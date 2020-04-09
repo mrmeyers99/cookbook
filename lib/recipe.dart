@@ -49,10 +49,11 @@ class RecipeList extends StatelessWidget {
           ],
         ),
       ),
-      body: ListView.builder(
+      body: GridView.builder(
         itemCount: recipes.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         itemBuilder: (context, index) {
-          return ListTile(
+          return Card(child: ListTile(
             title: Text(recipes[index].title),
             onTap: () {
               Navigator.push(
@@ -62,7 +63,7 @@ class RecipeList extends StatelessWidget {
                 )
               );
             },
-          );
+          ));
         },
       ),
     );
