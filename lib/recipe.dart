@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class Recipe {
   final String title;
-  final String ingredients;
-  final String instructions;
+  final List<String> ingredients;
+  final List<String> instructions;
 
   Recipe(this.title, this.ingredients, this.instructions);
 }
@@ -12,11 +12,15 @@ class RecipeList extends StatelessWidget {
 
   final recipes = List<Recipe>.generate(
     20,
-        (i) => Recipe(
-      'Recipe $i',
-      'Ingredients for recipe $i',
-      'Instructions for recipe $i',
-    ),
+        (i) {
+          List<String> ingredients = List<String>.generate(5, (k) => '$k cups ingredient $k');
+          List<String> instructions = List<String>.generate(5, (k) => 'Add ingredient $k into a bowl and stir to combine');
+          return Recipe(
+            'Recipe $i',
+            ingredients,
+            instructions,
+          );
+        },
   );
 
   @override
@@ -51,51 +55,46 @@ class RecipeScreen extends StatelessWidget {
   // In the constructor, require a Todo.
   RecipeScreen({Key key, @required this.recipe}) : super(key: key);
 
+  ListView buildListView(List<String> list) {
+    return ListView.builder(
+      physics: BouncingScrollPhysics(),
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      itemCount: list.length,
+      padding: EdgeInsets.all(16),
+      itemBuilder: (BuildContext ctxt, int index) =>
+          Card(
+            child: ListTile(title: Text(list[index]))
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Use the Todo to create the UI.
     return OrientationBuilder(
       builder: (context, orientation) {
-        if (orientation == Orientation.portrait) {
-          return DefaultTabController(
-            length: 2,
-            child: Scaffold(
-              appBar: AppBar(
-                bottom: TabBar(
-                  tabs: [
-                    Tab(text: "Ingredients"),
-                    Tab(text: "Instructions"),
-                  ],
-                ),
-                title: Text(recipe.title),
-              ),
-              body: TabBarView(
-                children: [
-                  Text(recipe.ingredients),
-                  Text(recipe.instructions),
+        // TODO eventually change layout for portrait vs landscape
+        return DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                tabs: [
+                  Tab(text: "Ingredients"),
+                  Tab(text: "Instructions"),
                 ],
               ),
+              title: Text(recipe.title),
             ),
-          );
-        } else {
-          return Container(
-            child: Row(
+            body: TabBarView(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(recipe.ingredients)
-                  ],
-                ),
-                Column(
-                  children: <Widget>[
-                    Text(recipe.instructions)
-                  ],
-                ),
-              ]
+                buildListView(recipe.ingredients),
+                buildListView(recipe.instructions),
+              ],
             ),
-          );
-        }
+          ),
+        );
       }
     );
 
