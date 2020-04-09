@@ -27,7 +27,27 @@ class RecipeList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('First Route'),
+        title: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      'Recipes',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.search),
+          ],
+        ),
       ),
       body: ListView.builder(
         itemCount: recipes.length,
