@@ -1,31 +1,51 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:logging/logging.dart';
+
+import 'cache.dart';
+
+part 'recipe.g.dart';
+
+@JsonSerializable()
 class Recipe {
   final String title;
+  final String imageUrl;
   final List<String> ingredients;
   final List<String> instructions;
 
-  Recipe(this.title, this.ingredients, this.instructions);
+  Recipe(this.title, this.imageUrl, this.ingredients, this.instructions);
+
+  factory Recipe.fromJson(Map<String, dynamic> json) =>
+      _$RecipeFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RecipeToJson(this);
 }
 
 class RecipeList extends StatelessWidget {
-  final recipes = List<Recipe>.generate(
-    20,
-    (i) {
-      List<String> ingredients =
-          List<String>.generate(5, (k) => '$k cups ingredient $k');
-      List<String> instructions = List<String>.generate(
-          5, (k) => 'Add ingredient $k into a bowl and stir to combine');
-      return Recipe(
-        'Recipe $i',
-        ingredients,
-        instructions,
-      );
-    },
-  );
+  final log = Logger('RecipeList');
+  final recipes;
+
+  RecipeList(this.recipes);
 
   @override
   Widget build(BuildContext context) {
+    WidgetsFlutterBinding.ensureInitialized();
+    final cache = CustomCacheManager();
+
+//    log.info("Going to get a file from the cache");
+//    final future = cache.getSingleFile("https://drive.google.com/uc?export=view&id=1XjlY4002dNszTBcwtuVr-lZlnLSD3scK");
+//    future.then((file) {
+//      log.info("got file");
+//      log.info(file);
+//      final contents = file.readAsStringSync();
+//      var list = json.decode(contents) as List;
+//      List<Recipe> newRecipes = list.map((i)=>Recipe.fromJson(i)).toList();
+//      log.info("got ${newRecipes.length} recipes");
+//      recipes.addAll(newRecipes);
+//    });
+
     return Scaffold(
         // https://medium.com/flutterpub/implementing-search-in-flutter-17dc5aa72018
         body: CustomScrollView(slivers: <Widget>[
