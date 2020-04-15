@@ -49,7 +49,10 @@ class RecipeList extends StatelessWidget {
     return Scaffold(
         // https://medium.com/flutterpub/implementing-search-in-flutter-17dc5aa72018
         body: CustomScrollView(slivers: <Widget>[
-      SliverAppBar(title: Text("Recipes"), actions: <Widget>[
+      SliverAppBar(
+        title: Text("Recipes"), 
+        floating: true, 
+        actions: <Widget>[
         IconButton(
           icon: Icon(Icons.search),
           onPressed: () {
