@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:logging/logging.dart';
+import 'package:test_flutter/view_recipe.dart';
 
 import 'cache.dart';
 
@@ -34,24 +35,12 @@ class RecipeList extends StatelessWidget {
     WidgetsFlutterBinding.ensureInitialized();
     final cache = CustomCacheManager();
 
-//    log.info("Going to get a file from the cache");
-//    final future = cache.getSingleFile("https://drive.google.com/uc?export=view&id=1XjlY4002dNszTBcwtuVr-lZlnLSD3scK");
-//    future.then((file) {
-//      log.info("got file");
-//      log.info(file);
-//      final contents = file.readAsStringSync();
-//      var list = json.decode(contents) as List;
-//      List<Recipe> newRecipes = list.map((i)=>Recipe.fromJson(i)).toList();
-//      log.info("got ${newRecipes.length} recipes");
-//      recipes.addAll(newRecipes);
-//    });
-
     return Scaffold(
         // https://medium.com/flutterpub/implementing-search-in-flutter-17dc5aa72018
         body: CustomScrollView(slivers: <Widget>[
       SliverAppBar(
-        title: Text("Recipes"), 
-        floating: true, 
+        title: Text("Recipes"),
+        floating: true,
         actions: <Widget>[
         IconButton(
           icon: Icon(Icons.search),
@@ -93,7 +82,7 @@ class RecipeList extends StatelessWidget {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => RecipeScreen(recipe: recipe),
+              builder: (context) => MainCollapsingToolbar(recipe),
             ));
       },
     ));
@@ -156,7 +145,7 @@ class RecipeSearchDelegate extends SearchDelegate {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RecipeScreen(recipe: recipes[index]),
+                  builder: (context) => MainCollapsingToolbar(recipes[index]),
                 ));
           },
         ));
@@ -181,68 +170,11 @@ class RecipeSearchDelegate extends SearchDelegate {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => RecipeScreen(recipe: recipes[index]),
+                  builder: (context) => MainCollapsingToolbar(recipes[index]),
                 ));
           },
         ));
       },
     );
-  }
-}
-
-class RecipeScreen extends StatelessWidget {
-  final Recipe recipe;
-
-  // In the constructor, require a Todo.
-  RecipeScreen({Key key, @required this.recipe}) : super(key: key);
-
-  ListView buildListView(List<String> list) {
-    return ListView.builder(
-      physics: BouncingScrollPhysics(),
-      scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      itemCount: list.length,
-      padding: EdgeInsets.all(16),
-      itemBuilder: (BuildContext ctxt, int index) =>
-          Card(child: ListTile(title: Text(list[index]))),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Use the Todo to create the UI.
-    return OrientationBuilder(builder: (context, orientation) {
-      // TODO eventually change layout for portrait vs landscape
-      return DefaultTabController(
-        length: 2,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: TabBar(
-              tabs: [
-                Tab(text: "Ingredients"),
-                Tab(text: "Instructions"),
-              ],
-            ),
-            title: Text(recipe.title),
-          ),
-          body: TabBarView(
-            children: [
-              buildListView(recipe.ingredients),
-              buildListView(recipe.instructions),
-            ],
-          ),
-        ),
-      );
-    });
-
-//    return Scaffold(
-//      appBar: AppBar(
-//        title: Text(recipe.title),
-//      ),
-//      body: Padding(
-//        padding: EdgeInsets.all(16.0),
-//        child: Text(recipe.ingredients),
-//      ),
-//    );
   }
 }
