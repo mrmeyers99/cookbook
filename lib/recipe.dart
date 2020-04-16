@@ -91,7 +91,7 @@ class _RecipeListState extends State<RecipeList> {
                 return getRecipeCard(snapshot.data.documents[index], context);
               },
               /// Set childCount to limit no.of items
-              childCount: snapshot.hasData ? 1 : 0,
+              childCount: snapshot.hasData ? snapshot.data.documents.length : 0,
             ),
           ),
       ),
