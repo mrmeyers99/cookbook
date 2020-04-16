@@ -20,15 +20,15 @@ Future<void> main() async {
 
 
   log.info("Going to get recipes from online");
-  final file = await cache.getSingleFile("https://drive.google.com/uc?export=view&id=1XjlY4002dNszTBcwtuVr-lZlnLSD3scK");
-  final contents = file.readAsStringSync();
-  var list = json.decode(contents) as List;
-  List<Recipe> recipes = list.map((i)=>Recipe.fromJson(i)).toList();
+//  final file = await cache.getSingleFile("https://drive.google.com/uc?export=view&id=1XjlY4002dNszTBcwtuVr-lZlnLSD3scK");
+//  final contents = file.readAsStringSync();
+//  var list = json.decode(contents) as List;
+//  List<Recipe> recipes = list.map((i)=>Recipe.fromJson(i)).toList();
 
   runApp(MaterialApp(
       title: 'Cookbook',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: RecipeList(recipes)));
+      home: RecipeList()));
 }

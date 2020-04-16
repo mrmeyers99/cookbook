@@ -1,4 +1,4 @@
-package com.example.test_flutter
+package com.meyers.cookbook
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

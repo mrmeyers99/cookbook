@@ -38,18 +38,18 @@ class _MainCollapsingToolbarState extends State<MainCollapsingToolbar> {
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               SliverAppBar(
-                expandedHeight: recipe.imageUrl != null ? 200.0 : 20.0,
+                expandedHeight: recipe['imageUrl'] != null ? 200.0 : 20.0,
                 floating: false,
                 pinned: true,
                 flexibleSpace: FlexibleSpaceBar(
                     centerTitle: true,
-                    title: Text(recipe.title,
+                    title: Text(recipe['title'],
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16.0,
                         )),
-                    background: recipe.imageUrl != null ? Image.network(
-                      recipe.imageUrl, //todo use cache
+                    background: recipe['imageUrl'] != null ? Image.network(
+                      recipe['imageUrl'], //todo use cache
                       fit: BoxFit.cover,
                     ) : null
                 ),
@@ -71,8 +71,8 @@ class _MainCollapsingToolbarState extends State<MainCollapsingToolbar> {
           },
           body: TabBarView(
             children: [
-              buildListView(recipe.ingredients),
-              buildListView(recipe.instructions),
+              buildListView(List.from(recipe['ingredients'])),
+              buildListView(List.from(recipe['instructions'])),
             ],
           ),
         ),
@@ -95,6 +95,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return new Container(
+      color: Colors.white,
       child: _tabBar,
     );
   }
