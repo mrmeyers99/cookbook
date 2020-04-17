@@ -71,8 +71,8 @@ class _MainCollapsingToolbarState extends State<MainCollapsingToolbar> {
           },
           body: TabBarView(
             children: [
-              buildListView(List.from(recipe['ingredients'])),
-              buildListView(List.from(recipe['instructions'])),
+              buildListView(recipe['ingredients'] == null ? List() : List.from(recipe['ingredients'])),
+              buildListView(recipe['instructions'] == null ? List() : List.from(recipe['instructions'])),
             ],
           ),
         ),
