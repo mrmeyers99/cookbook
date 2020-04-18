@@ -138,7 +138,7 @@ class RecipeSearchDelegate extends SearchDelegate {
   }
 
   @override
-  Widget buildResults(BuildContext context) {
+  Widget buildResults(BuildContext context, {int maxResults}) {
     if (query.length < 3) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -152,9 +152,13 @@ class RecipeSearchDelegate extends SearchDelegate {
       );
     }
 
-    var stream = Firestore.instance.collection('recipes').where("title", isEqualTo: query).snapshots();
+    // todo: I think i shouldn't be creating this instance in a buildResults function for performance reaons
+    var dbQuery = Firestore.instance.collection('recipes').where("keywords", arrayContainsAny: query.split(" "));
+    if (maxResults != null) {
+      dbQuery = dbQuery.limit(maxResults);
+    }
+    var stream = dbQuery.snapshots();
 
-    //todo actually return search results instead of everything
     return StreamBuilder(
         stream: stream,
         builder: (context, snapshot) =>
@@ -183,7 +187,7 @@ class RecipeSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return buildResults(context);
+    return buildResults(context, maxResults: 6);
     //todo actually return suggestions instead of hardcoding 4
 //    return GridView.builder(
 //      itemCount: 4,
