@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_flutter/model/recipe.dart';
 import 'package:test_flutter/ui/screens/individual_recipe.dart';
+import 'package:test_flutter/ui/widgets/recipe_card_thumbnail.dart';
 
 class HomeScreen extends StatefulWidget {
   final log = Logger('HomeScreen');
@@ -64,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 var docSnapshot = snapshot.data.documents[index];
-                return getRecipeCard(Recipe.fromMap(docSnapshot.data, docSnapshot.documentID), context);
+                return RecipeThumbnail(Recipe.fromMap(docSnapshot.data, docSnapshot.documentID));
               },
               /// Set childCount to limit no.of items
               childCount: snapshot.hasData ? snapshot.data.documents.length : 0,
@@ -72,20 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
       ),
     ]));
-  }
-
-  Card getRecipeCard(Recipe recipe, BuildContext context) {
-    return Card(
-        child: ListTile(
-      title: Text(recipe.title),
-      onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RecipeScreen(recipe.id),
-            ));
-      },
-    ));
   }
 }
 
@@ -143,17 +130,7 @@ class RecipeSearchDelegate extends SearchDelegate {
               gridDelegate:
               SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
               itemBuilder: (context, index) {
-                return Card(
-                    child: ListTile(
-                      title: Text(snapshot.data.documents[index]['title']),
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RecipeScreen(snapshot.data.documents[index].documentID),
-                            ));
-                      },
-                    ));
+                return RecipeThumbnail(Recipe.fromMap(snapshot.data.documents[index], snapshot.data.documents[index].documentID));
               },
             ),
     );

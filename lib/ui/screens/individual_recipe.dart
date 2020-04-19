@@ -31,15 +31,27 @@ class _RecipeScreenState extends State<RecipeScreen> {
     stream = Firestore.instance.collection("recipes").document(recipeId);
   }
 
-  ListView buildListView(List<String> list) {
+  ListView buildListView(List<Section> sections) {
     return ListView.builder(
       physics: BouncingScrollPhysics(),
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
-      itemCount: list.length,
+      itemCount: sections.length,
       padding: EdgeInsets.all(16),
-      itemBuilder: (BuildContext ctxt, int index) =>
-          Card(child: ListTile(title: Text(list[index]))),
+      itemBuilder: (BuildContext ctxt, int index) {
+        var children = List<Widget>();
+        if (sections[index].title != null) {
+          //todo: figure out how to make there be less space between the section header
+          children.add(ListTile(title: Text(sections[index].title, style: TextStyle(fontWeight: FontWeight.bold)), contentPadding: EdgeInsets.only(top: 0, left: 16, bottom: 0),));
+          children.add(Divider(color: Colors.black12, height: 12));
+        }
+        children.add(ListTile(title: Text(sections[index].list.join("\n")), contentPadding: EdgeInsets.only(left: 16, bottom: 16, right: 16, top: 8),));
+//        children.addAll(sections[index].list.map((i) => ListTile(title: Text(i), dense: true)));
+        return Card(child: Column(
+          children: children,
+        ));
+      }
+
     );
   }
 
@@ -95,8 +107,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
               },
               body: TabBarView(
                 children: [
-                  buildListView(recipe.ingredients),
-                  buildListView(recipe.instructions),
+                  buildListView(Section.fromMarkup(recipe.ingredients)),
+                  buildListView(Section.fromMarkup(recipe.instructions)),
                 ],
               ),
             ),
