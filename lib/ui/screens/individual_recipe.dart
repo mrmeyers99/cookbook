@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:test_flutter/model/recipe.dart';
+import 'package:wakelock/wakelock.dart';
 
+import '../../main.dart';
 import 'edit_recipe.dart';
 
 // mostly from https://medium.com/@diegoveloper/flutter-collapsing-toolbar-sliver-app-bar-14b858e87abe
@@ -21,7 +23,7 @@ class RecipeScreen extends StatefulWidget {
   }
 }
 
-class _RecipeScreenState extends State<RecipeScreen> {
+class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
 
   final recipeId;
   var stream;
@@ -31,6 +33,32 @@ class _RecipeScreenState extends State<RecipeScreen> {
   @override
   void initState() {
     stream = Firestore.instance.collection("recipes").document(recipeId);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context));
+    Wakelock.enable();
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    Wakelock.disable();
+    super.dispose();
+  }
+
+  @override
+  void didPush() {
+    // Route was pushed onto navigator and is now topmost route.
+    Wakelock.enable();
+  }
+
+  @override
+  void didPopNext() {
+    // Covering route was popped off the navigator.
+    Wakelock.enable();
   }
 
   ListView buildListView(List<Section> sections) {
