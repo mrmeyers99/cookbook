@@ -23,7 +23,7 @@ class RecipeThumbnail extends StatelessWidget {
                   title: Text(recipe.title),
                 ),
                 // todo cache image and make this look better and handle resizing
-                recipe.imageUrl == null ? Container() : Image.network(recipe.imageUrl, height: 140),
+                recipe.imageUrl == null ? Container() : Image.network(recipe.imageUrl, height: 100),
               ])
       )
     );
