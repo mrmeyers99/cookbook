@@ -102,21 +102,21 @@ class RecipeSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context, {int maxResults}) {
-    if (query.length < 3) {
+    if (query.length < 2) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Center(
             child: Text(
-              "Search term must be longer than two letters.",
+              "Search term must be longer than one letter.",
             ),
           )
         ],
       );
     }
 
-    // todo: I think i shouldn't be creating this instance in a buildResults function for performance reaons
-    var dbQuery = Firestore.instance.collection('recipes').where("keywords", arrayContainsAny: query.split(" "));
+    // todo: I think i shouldn't be creating this instance in a buildResults function for performance reasons
+    var dbQuery = Firestore.instance.collection('recipes').where("keywords", arrayContainsAny: query.toLowerCase().split(" "));
     if (maxResults != null) {
       dbQuery = dbQuery.limit(maxResults);
     }
@@ -130,7 +130,7 @@ class RecipeSearchDelegate extends SearchDelegate {
               gridDelegate:
               SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
               itemBuilder: (context, index) {
-                return RecipeThumbnail(Recipe.fromMap(snapshot.data.documents[index], snapshot.data.documents[index].documentID));
+                return RecipeThumbnail(Recipe.fromMap(snapshot.data.documents[index].data, snapshot.data.documents[index].documentID));
               },
             ),
     );

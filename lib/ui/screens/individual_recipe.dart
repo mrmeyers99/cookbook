@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:test_flutter/model/recipe.dart';
 
+import 'edit_recipe.dart';
+
 // mostly from https://medium.com/@diegoveloper/flutter-collapsing-toolbar-sliver-app-bar-14b858e87abe
 
 class RecipeScreen extends StatefulWidget {
@@ -77,6 +79,14 @@ class _RecipeScreenState extends State<RecipeScreen> {
                     expandedHeight: recipe.imageUrl != null ? 200.0 : 20.0,
                     floating: false,
                     pinned: true,
+                    actions: <Widget>[
+                      IconButton(icon: Icon(Icons.edit), onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditRecipeScreen(recipe),
+                            ));
+                      })],
                     flexibleSpace: FlexibleSpaceBar(
                         centerTitle: true,
                         title: Text(recipe.title,
