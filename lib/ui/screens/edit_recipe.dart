@@ -43,7 +43,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
 
     var subWordSet = Set<String>();
     wordSet.forEach((word) {
-      for(var i = 2; i < word.length; i++) {
+      for(var i = 2; i <= word.length; i++) {
         subWordSet.add(word.substring(0, i));
       }
     });
