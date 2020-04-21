@@ -7,20 +7,25 @@ import 'package:test_flutter/ui/widgets/recipe_card_thumbnail.dart';
 
 class HomeScreen extends StatefulWidget {
   final log = Logger('HomeScreen');
+  final String uid;
 
-  HomeScreen({Key key});
+  HomeScreen({Key key, String uid}): this.uid = uid;
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _HomeScreenState createState() => _HomeScreenState(uid);
 }
 
 class _HomeScreenState extends State<HomeScreen> {
 
+  final String uid;
+
   Stream<QuerySnapshot> stream;
+
+  _HomeScreenState(this.uid);
 
   @override
   void initState() {
-    stream = Firestore.instance.collection('recipes').snapshots();
+    stream = Firestore.instance.collection('recipes').where("uid", isEqualTo: uid).snapshots();
     super.initState();
   }
 

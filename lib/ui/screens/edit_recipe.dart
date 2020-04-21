@@ -37,7 +37,8 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
 
   List<String> _buildKeywords(String title, List<String> ingredients) {
     var wordList = title.split(" ");
-    //todo ince we add ingredient parsing, we should probably ignore quantities and units
+    //todo since we add ingredient parsing, we should probably ignore quantities and units
+    //todo ignore punctuation in words?  smores vs s'mores?
     ingredients.where((s) => !s.startsWith("//")).forEach((s) => wordList.addAll(s.split(" ")));
     var wordSet = wordList.map((s) => s.toLowerCase()).toSet();
 
