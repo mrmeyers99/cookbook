@@ -20,7 +20,7 @@ class RecipeThumbnail extends StatelessWidget {
           child: Column(
               children: [
                 ListTile(
-                  title: Text(recipe.title),
+                  title: Text(recipe.name),
                 ),
                 // todo cache image and make this look better and handle resizing
                 recipe.imageUrl == null ? Container() : Image.network(recipe.imageUrl, height: 100),

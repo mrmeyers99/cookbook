@@ -22,12 +22,12 @@ class EditRecipeScreen extends StatefulWidget {
 class _EditRecipeScreenState extends State<EditRecipeScreen> {
 
   final Recipe recipe;
-  final TextEditingController titleController;
+  final TextEditingController nameController;
   final TextEditingController ingredientsController;
   final TextEditingController instructionsController;
 
   _EditRecipeScreenState(this.recipe):
-        this.titleController = TextEditingController(text: recipe.title),
+        this.nameController = TextEditingController(text: recipe.name),
         this.ingredientsController = TextEditingController(text: recipe.ingredients.join("\n")),
         this.instructionsController = TextEditingController(text: recipe.instructions.join("\n"));
 
@@ -35,8 +35,8 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
   // and allows validation of the form.
   final _formKey = GlobalKey<FormState>();
 
-  List<String> _buildKeywords(String title, List<String> ingredients) {
-    var wordList = title.split(" ");
+  List<String> _buildKeywords(String name, List<String> ingredients) {
+    var wordList = name.split(" ");
     //todo since we add ingredient parsing, we should probably ignore quantities and units
     //todo ignore punctuation in words?  smores vs s'mores?
     ingredients.where((s) => !s.startsWith("//")).forEach((s) => wordList.addAll(s.split(" ")));
@@ -66,11 +66,11 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                   children: <Widget>[
                   ListTile(title:
                     TextFormField(
-                      controller: titleController,
-                      decoration: InputDecoration(hintText: "Title"),
+                      controller: nameController,
+                      decoration: InputDecoration(hintText: "Name"),
                       validator: (value) {
                         if (value.isEmpty) {
-                          return 'Please enter a title';
+                          return 'Please enter a name';
                         }
                         return null;
                       },
@@ -110,11 +110,12 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                                   throw "Recipe does not exist!";
                                 }
                                 transaction.update(recipeRef, {
-                                  "title": titleController.text,
+                                  "name": nameController.text,
                                   "ingredients": ingredientsController.text.split("\n"),
                                   "instructions": instructionsController.text.split("\n"),
-                                  "keywords": _buildKeywords(titleController.text, ingredientsController.text.split("\n")),
-                                  "updated_at": FieldValue.serverTimestamp() });
+                                  "keywords": _buildKeywords(nameController.text, ingredientsController.text.split("\n")),
+                                  "updated_at": FieldValue.serverTimestamp()
+                                });
                               });
                             })
                             .then((result) {

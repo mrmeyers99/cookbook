@@ -117,7 +117,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
                       })],
                     flexibleSpace: FlexibleSpaceBar(
                         centerTitle: true,
-                        title: Text(recipe.title,
+                        title: Text(recipe.name,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16.0,
