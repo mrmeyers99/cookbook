@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
     stream = Firestore.instance
         .collection('recipes')
         .where("uid", isEqualTo: uid)
+        .orderBy('name')
         .snapshots();
     super.initState();
   }
