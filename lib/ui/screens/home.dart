@@ -76,15 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
               floating: true,
               pinned: true,
               actions: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.sort), //todo: implement
-                  onPressed: () {
-                    setState((){
-                      sortBy = 'updated_at'; //todo: lose recipes when no field
-                      queryFirestore();
-                      });
-                  }
-                ),
+                _sortPopup(),
                 IconButton(
                   icon: Icon(Icons.loyalty), //todo: implement
                 ),
@@ -122,6 +114,35 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ]));
   }
+
+    Widget _sortPopup() => PopupMenuButton<String>(
+    itemBuilder: (context) => [
+      PopupMenuItem(
+        value: "name",
+        child: Text("Name")
+      ),
+      PopupMenuItem(
+        value: "updated_at",
+        child: Text("Last Updated")
+      ),
+    ],
+    initialValue: 'name',
+    onCanceled: () {
+      sortBy = sortBy;
+      //print("You have cancelled the menu");
+    },
+    onSelected: (value) {
+      setState((){
+        sortBy = value;
+        queryFirestore();
+      });
+      //print("You have chosen wisely:$value");
+    },
+    icon: Icon(Icons.sort),
+    //offset: Offset(0,100)
+  );
+
+
 }
 
 class RecipeSearchDelegate extends SearchDelegate {
@@ -193,3 +214,5 @@ class RecipeSearchDelegate extends SearchDelegate {
     return buildResults(context, maxResults: 6);
   }
 }
+
+
