@@ -21,17 +21,23 @@ class _HomeScreenState extends State<HomeScreen> {
   final String uid;
 
   Stream<QuerySnapshot> stream;
+  String sortBy;
 
   _HomeScreenState(this.uid);
 
   @override
   void initState() {
+    sortBy = 'name';
+    queryFirestore();
+    super.initState();
+  }
+
+  void queryFirestore() {
     stream = Firestore.instance
         .collection('recipes')
         .where("uid", isEqualTo: uid)
-        .orderBy('name')
+        .orderBy(sortBy)
         .snapshots();
-    super.initState();
   }
 
   @override
@@ -72,6 +78,12 @@ class _HomeScreenState extends State<HomeScreen> {
               actions: <Widget>[
                 IconButton(
                   icon: Icon(Icons.sort), //todo: implement
+                  onPressed: () {
+                    setState((){
+                      sortBy = 'updated_at'; //todo: lose recipes when no field
+                      queryFirestore();
+                      });
+                  }
                 ),
                 IconButton(
                   icon: Icon(Icons.loyalty), //todo: implement
