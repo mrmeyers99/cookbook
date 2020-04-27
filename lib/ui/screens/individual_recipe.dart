@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:test_flutter/model/recipe.dart';
+import 'package:home_cooked/model/recipe.dart';
 import 'package:wakelock/wakelock.dart';
 
 import '../../main.dart';

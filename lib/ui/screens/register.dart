@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'home.dart';
+import 'package:home_cooked/routing_constants.dart';
 
 // stolen shamelessly from https://heartbeat.fritz.ai/firebase-user-authentication-in-flutter-1635fb175675
 class RegisterScreen extends StatefulWidget {
@@ -118,12 +117,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     "email": emailInputController.text,
                                   })
                                   .then((result) => {
-                                        Navigator.pushAndRemoveUntil(
+                                        Navigator.pushNamedAndRemoveUntil(
                                             context,
-                                            MaterialPageRoute(
-                                                builder: (context) => HomeScreen(
-                                                      uid: currentUser.uid,
-                                                    )),
+                                            HomeViewRoute,
                                             (_) => false),
                                         firstNameInputController.clear(),
                                         lastNameInputController.clear(),

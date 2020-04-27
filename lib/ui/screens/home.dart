@@ -1,41 +1,60 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:home_cooked/routing_constants.dart';
+import 'package:home_cooked/service/UserService.dart';
 import 'package:logging/logging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:test_flutter/model/recipe.dart';
-import 'package:test_flutter/ui/widgets/recipe_card_thumbnail.dart';
+import 'package:home_cooked/model/recipe.dart';
+import 'package:home_cooked/ui/widgets/recipe_card_thumbnail.dart';
 
+import '../../locator.dart';
 import 'login.dart';
 
 class HomeScreen extends StatefulWidget {
   final log = Logger('HomeScreen');
-  final String uid;
 
-  HomeScreen({Key key, String uid}) : this.uid = uid;
+  HomeScreen({Key key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState(uid);
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final String uid;
+
+  final log = Logger('_HomeScreenState');
+
+  final UserService userService;
 
   Stream<QuerySnapshot> stream;
 
-  _HomeScreenState(this.uid);
+  String uid;
+
+  _HomeScreenState(): this.userService = locator.get<UserService>();
 
   @override
   void initState() {
-    stream = Firestore.instance
-        .collection('recipes')
-        .where("uid", isEqualTo: uid)
-        .snapshots();
     super.initState();
+    log.info("Loading home screen");
+    userService.getCurrentUser().then((user) {
+        uid = user.uid;
+        log.info("User $uid is logged in");
+        setState(() {
+          stream = Firestore.instance
+              .collection('recipes')
+              .where("uid", isEqualTo: user.uid)
+              .snapshots();
+        });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     WidgetsFlutterBinding.ensureInitialized();
+
+    if (stream == null) {
+      log.info("Recipes have not been loaded yet");
+      return Container(child: Text("Loading recipes..."));
+    }
 
     return Scaffold(
         drawer: Drawer(
@@ -52,11 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ListTile(
                 title: Text('Logout'),
                 onTap: () {
-                  FirebaseAuth.instance.signOut().then((result) =>
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => LoginScreen())));
+                  userService.signOut().then((result) =>
+                      Navigator.pushReplacementNamed(context, LoginViewRoute));
                 },
               )
             ],

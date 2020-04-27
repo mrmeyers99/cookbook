@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:test_flutter/model/recipe.dart';
-import 'package:test_flutter/ui/screens/individual_recipe.dart';
+import 'package:home_cooked/model/recipe.dart';
+import 'package:home_cooked/ui/screens/individual_recipe.dart';
 
 class RecipeThumbnail extends StatelessWidget {
   final Recipe recipe;
