@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:home_cooked/locator.dart';
 import 'package:logging/logging.dart';
 
-import 'cache.dart';
-import 'ui/screens/home.dart';
-import 'ui/screens/login.dart';
-import 'ui/screens/register.dart';
+import 'router.dart' as router;
+import 'routing_constants.dart';
 import 'ui/screens/splash.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
@@ -15,17 +14,16 @@ void main() {
     print('${record.level.name}: ${record.time}: ${record.message}');
   });
 
+  setupLocator();
+
   runApp(MaterialApp(
     title: 'Cookbook',
     theme: ThemeData(
       primarySwatch: Colors.blue,
     ),
     home: SplashScreen(),
+    onGenerateRoute: router.generateRoute,
+    initialRoute: HomeViewRoute,
     navigatorObservers: [routeObserver],
-    routes: {
-      '/home': (BuildContext context) => HomeScreen(),
-      '/login': (BuildContext context) => LoginScreen(),
-      '/register': (BuildContext context) => RegisterScreen(),
-    },
   ));
 }

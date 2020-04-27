@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:home_cooked/model/user.dart';
+import 'package:home_cooked/routing_constants.dart';
+import 'package:home_cooked/service/UserService.dart';
 
-import 'home.dart';
+import '../../locator.dart';
 
 // (mostly) stolen shamelessly from https://heartbeat.fritz.ai/firebase-user-authentication-in-flutter-1635fb175675
 class LoginScreen extends StatefulWidget {
@@ -13,10 +14,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final UserService userService;
+
   final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
+
   TextEditingController emailInputController;
   TextEditingController pwdInputController;
 
+  _LoginScreenState(): this.userService = locator.get<UserService>();
   @override
   initState() {
     emailInputController = new TextEditingController();
@@ -76,22 +81,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     textColor: Colors.white,
                     onPressed: () {
                       if (_loginFormKey.currentState.validate()) {
-                        FirebaseAuth.instance
-                            .signInWithEmailAndPassword(
-                                email: emailInputController.text,
-                                password: pwdInputController.text)
-                            .then((currentUser) => Firestore.instance
-                                .collection("users")
-                                .document(currentUser.uid)
-                                .get()
-                                .then((DocumentSnapshot result) =>
-                                    Navigator.pushReplacement(
+                        userService
+                            .signIn(emailInputController.text, pwdInputController.text)
+                            .then((User user) =>
+                                    Navigator.pushReplacementNamed(
                                         context,
-                                        MaterialPageRoute(
-                                            builder: (context) => HomeScreen(
-                                                  uid: currentUser.uid,
-                                                ))))
-                                .catchError((err) => print(err)))
+                                        HomeViewRoute))
                             .catchError((err) => print(err));
                       }
                     },
@@ -100,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   FlatButton(
                     child: Text("Register here!"),
                     onPressed: () {
-                      Navigator.pushNamed(context, "/register");
+                      Navigator.pushNamed(context, RegisterViewRoute);
                     },
                   )
                 ],

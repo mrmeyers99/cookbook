@@ -4,7 +4,7 @@ import 'dart:core';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:test_flutter/model/recipe.dart';
+import 'package:home_cooked/model/recipe.dart';
 
 class EditRecipeScreen extends StatefulWidget {
 
