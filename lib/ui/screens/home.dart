@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:home_cooked/routing_constants.dart';
+import 'package:home_cooked/service/RecipeService.dart';
 import 'package:home_cooked/service/UserService.dart';
 import 'package:logging/logging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,7 +8,6 @@ import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/ui/widgets/recipe_card_thumbnail.dart';
 
 import '../../locator.dart';
-import 'login.dart';
 
 class HomeScreen extends StatefulWidget {
   final log = Logger('HomeScreen');
@@ -24,13 +23,16 @@ class _HomeScreenState extends State<HomeScreen> {
   final log = Logger('_HomeScreenState');
 
   final UserService userService;
+  final RecipeService recipeService;
 
   Stream<QuerySnapshot> stream;
   String sortBy;
 
   String uid;
 
-  _HomeScreenState(): this.userService = locator.get<UserService>();
+  _HomeScreenState():
+      this.userService = locator.get<UserService>(),
+      this.recipeService = locator.get<RecipeService>();
 
   @override
   void initState() {
@@ -41,17 +43,13 @@ class _HomeScreenState extends State<HomeScreen> {
         uid = user.uid;
         log.info("User $uid is logged in");
         setState(() {
-          queryFirestore();
+          queryRecipes();
         });
     });
   }
 
-  void queryFirestore() {
-    stream = Firestore.instance
-        .collection('recipes')
-        .where("uid", isEqualTo: uid)
-        .orderBy(sortBy)
-        .snapshots();
+  void queryRecipes() {
+    stream = recipeService.getRecipes(uid, sortBy: sortBy);
   }
 
   @override
@@ -60,7 +58,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (stream == null) {
       log.info("Recipes have not been loaded yet");
-      return Container(child: Text("Loading recipes..."));
+      return Scaffold(
+        body: Center(
+          child: Container(
+            child: Text("Loading recipes..."),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
@@ -101,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     showSearch(
                       context: context,
-                      delegate: RecipeSearchDelegate(),
+                      delegate: RecipeSearchDelegate(uid),
                     );
                   },
                 ),
@@ -150,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
     onSelected: (value) {
       setState((){
         sortBy = value;
-        queryFirestore();
+        queryRecipes();
       });
       //print("You have chosen wisely:$value");
     },
@@ -162,6 +166,11 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class RecipeSearchDelegate extends SearchDelegate {
+  final RecipeService recipeService;
+  final String uid;
+
+  RecipeSearchDelegate(this.uid): this.recipeService = locator.get<RecipeService>();
+
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -199,14 +208,7 @@ class RecipeSearchDelegate extends SearchDelegate {
       );
     }
 
-    // todo: I think i shouldn't be creating this instance in a buildResults function for performance reasons
-    var dbQuery = Firestore.instance
-        .collection('recipes')
-        .where("keywords", arrayContainsAny: query.toLowerCase().split(" "));
-    if (maxResults != null) {
-      dbQuery = dbQuery.limit(maxResults);
-    }
-    var stream = dbQuery.snapshots();
+    var stream = recipeService.getRecipes(uid, keywords: query, maxResults: maxResults);
 
     return StreamBuilder(
       stream: stream,
