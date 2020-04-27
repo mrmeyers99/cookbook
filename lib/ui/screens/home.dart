@@ -6,6 +6,7 @@ import 'package:test_flutter/model/recipe.dart';
 import 'package:test_flutter/ui/widgets/recipe_card_thumbnail.dart';
 
 import 'login.dart';
+//import 'tags.dart';
 
 class HomeScreen extends StatefulWidget {
   final log = Logger('HomeScreen');
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Stream<QuerySnapshot> stream;
   String sortBy;
+  List filterBy;
 
   _HomeScreenState(this.uid);
 
@@ -36,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     stream = Firestore.instance
         .collection('recipes')
         .where("uid", isEqualTo: uid)
+        .where("tags", arrayContainsAny: filterBy)
         .orderBy(sortBy)
         .snapshots();
   }
@@ -78,7 +81,14 @@ class _HomeScreenState extends State<HomeScreen> {
               actions: <Widget>[
                 _sortPopup(),
                 IconButton(
-                  icon: Icon(Icons.loyalty), //todo: implement
+                  icon: Icon(Icons.loyalty),
+                  onPressed: () {
+                    setState((){
+                      filterBy = ["Breakfast"]; //todo:change to be dynamic
+                      queryFirestore();
+                    });
+                    //navigateToTagScreen(context);
+                  },
                 ),
                 IconButton(
                   icon: Icon(Icons.search),
@@ -116,6 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
     Widget _sortPopup() => PopupMenuButton<String>(
+    //https://medium.com/flutteropen/widgets-14-popupmenubutton-1f1437bbdce2
     itemBuilder: (context) => [
       PopupMenuItem(
         value: "name",
@@ -141,6 +152,15 @@ class _HomeScreenState extends State<HomeScreen> {
     icon: Icon(Icons.sort),
     //offset: Offset(0,100)
   );
+
+
+/*   final List<String> sampleStartTag = ['dessert'];
+  Future navigateToTagScreen(context) async {
+    Navigator.push(context,
+      MaterialPageRoute(
+        builder: (context) => TagScreen(),
+        ));
+} */
 
 
 }
