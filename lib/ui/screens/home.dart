@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final UserService userService;
 
   Stream<QuerySnapshot> stream;
+  String sortBy;
 
   String uid;
 
@@ -35,16 +36,22 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     log.info("Loading home screen");
+    sortBy = 'name';
     userService.getCurrentUser().then((user) {
         uid = user.uid;
         log.info("User $uid is logged in");
         setState(() {
-          stream = Firestore.instance
-              .collection('recipes')
-              .where("uid", isEqualTo: user.uid)
-              .snapshots();
+          queryFirestore();
         });
     });
+  }
+
+  void queryFirestore() {
+    stream = Firestore.instance
+        .collection('recipes')
+        .where("uid", isEqualTo: uid)
+        .orderBy(sortBy)
+        .snapshots();
   }
 
   @override
@@ -85,9 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
               floating: true,
               pinned: true,
               actions: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.sort), //todo: implement
-                ),
+                _sortPopup(),
                 IconButton(
                   icon: Icon(Icons.loyalty), //todo: implement
                 ),
@@ -125,6 +130,35 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ]));
   }
+
+    Widget _sortPopup() => PopupMenuButton<String>(
+    itemBuilder: (context) => [
+      PopupMenuItem(
+        value: "name",
+        child: Text("Name")
+      ),
+      PopupMenuItem(
+        value: "updated_at",
+        child: Text("Last Updated")
+      ),
+    ],
+    initialValue: 'name',
+    onCanceled: () {
+      sortBy = sortBy;
+      //print("You have cancelled the menu");
+    },
+    onSelected: (value) {
+      setState((){
+        sortBy = value;
+        queryFirestore();
+      });
+      //print("You have chosen wisely:$value");
+    },
+    icon: Icon(Icons.sort),
+    //offset: Offset(0,100)
+  );
+
+
 }
 
 class RecipeSearchDelegate extends SearchDelegate {
