@@ -12,6 +12,7 @@ class RecipeService {
 
   Stream<QuerySnapshot> getRecipes(String uid, {
     String sortBy = 'name',
+    bool sortDesc = false,
     List filterBy = const [""],
     String keywords = '',
     int maxResults = 0
@@ -24,8 +25,8 @@ class RecipeService {
     } else if (filterBy != [""] && filterBy != null) {
       query = query.where("tags", arrayContainsAny: filterBy);
     }
-
-    query = query.orderBy(sortBy);
+    log.info("sorting by $sortBy, descending = $sortDesc");
+    query = query.orderBy(sortBy, descending: sortDesc);
     if (maxResults > 0) {
       query = query.limit(maxResults);
     }
