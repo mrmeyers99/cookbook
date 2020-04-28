@@ -37,6 +37,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
   void initState() {
     super.initState();
     stream = _recipeService.getRecipe(recipeId);
+    _recipeService.markViewed(recipeId);
   }
 
   @override

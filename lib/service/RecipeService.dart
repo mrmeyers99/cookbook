@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logging/logging.dart';
 
 class RecipeService {
+  final log = Logger('RecipeService');
   final CollectionReference _recipes;
   final Firestore _db;
 
@@ -66,6 +68,23 @@ class RecipeService {
       }
     });
     return subWordSet.toList();
+  }
+
+  Future<void> markViewed(String id) {
+    var recipeRef = _recipes.document(id);
+    return _db.runTransaction((transaction) {
+      return transaction.get(recipeRef).then((recipeDoc) {
+        if (!recipeDoc.exists) {
+          throw "Recipe does not exist!";
+        }
+        transaction.update(recipeRef, {
+          "viewed_times": recipeDoc.data['viewed_times'] == null ? 1 : recipeDoc.data['viewed_times'] + 1,
+          "viewed_at": FieldValue.serverTimestamp()
+        });
+      });
+    })
+    .then((value) => {})
+    .catchError((err) => log.warning("Error marking recipe as viewed", err));
   }
 
 }
