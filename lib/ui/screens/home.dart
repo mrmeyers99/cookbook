@@ -53,11 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void queryRecipes() {
-<<<<<<< HEAD
-    stream = recipeService.getRecipes(uid, sortBy: sortBy, filterBy: filterBy);
-=======
     stream = recipeService.getRecipes(uid, sortBy: sortBy, sortDesc: sortDesc, filterBy: filterBy); //todo: implement this again: filterBy: filterBy
->>>>>>> fba8b7638bcf28274154d1c11c42f0050d740063
   }
 
   @override

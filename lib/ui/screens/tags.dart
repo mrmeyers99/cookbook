@@ -14,7 +14,7 @@ class TagScreen extends StatefulWidget {
   final uid;
 
   TagScreen(this.uid);
-  
+
 
   @override
   State<StatefulWidget> createState() {
@@ -33,7 +33,7 @@ class _TagScreenState extends State<TagScreen> {
   final RecipeService recipeService;
   final uid;
 
-  //List<QuerySnapshot> allTags;  
+  //List<QuerySnapshot> allTags;
   //Stream<QuerySnapshot> allTags;
   Future<Set<QuerySnapshot>> allTags;
 
@@ -44,7 +44,7 @@ class _TagScreenState extends State<TagScreen> {
 
   void queryAllTags() async {
     print('working on getting tags');
-    var allTags = await recipeService.getAllTags(uid).toSet();
+    var allTags = (await recipeService.getAllTags(uid)).toSet();
     print(allTags);
   }
 
