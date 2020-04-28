@@ -35,14 +35,15 @@ class RecipeService {
     return query.snapshots();
   }
 
-  Future<List<Recipe>> getAllTags(String uid) async {
+  Future<List<String>> getAllTags(String uid) async {
       QuerySnapshot query = await _recipes.where("uid", isEqualTo: uid).getDocuments();
-
-      return query.documents.map(
-        (doc) => Recipe(
-          //doc.data['tags']
-        )
-      ).toList();
+      var tagSet = Set<String>();
+      query.documents
+          .where((doc) => doc.data['tags'] != null)
+          .forEach((doc) => tagSet.addAll(List.from(doc.data['tags'])));
+      var tagList = tagSet.toList();
+      tagList.sort();
+      return tagList;
     }
 
   /*Stream<QuerySnapshot> getAllTags(String uid) {

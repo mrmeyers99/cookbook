@@ -44,7 +44,7 @@ class _TagScreenState extends State<TagScreen> {
 
   void queryAllTags() async {
     print('working on getting tags');
-    var allTags = (await recipeService.getAllTags(uid)).toSet();
+    var allTags = await recipeService.getAllTags(uid);
     print(allTags);
   }
 
