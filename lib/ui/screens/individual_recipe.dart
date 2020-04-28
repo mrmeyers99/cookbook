@@ -1,5 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:home_cooked/locator.dart';
+import 'package:home_cooked/service/RecipeService.dart';
 import 'package:logging/logging.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:wakelock/wakelock.dart';
@@ -25,14 +26,18 @@ class RecipeScreen extends StatefulWidget {
 
 class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
 
-  final recipeId;
+  final String recipeId;
+  final RecipeService _recipeService;
+
   var stream;
 
-  _RecipeScreenState(this.recipeId);
+  _RecipeScreenState(this.recipeId) : this._recipeService = locator.get<RecipeService>();
 
   @override
   void initState() {
-    stream = Firestore.instance.collection("recipes").document(recipeId);
+    super.initState();
+    stream = _recipeService.getRecipe(recipeId);
+    _recipeService.markViewed(recipeId);
   }
 
   @override
@@ -89,7 +94,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
   Widget build(BuildContext context) {
 
     return StreamBuilder(
-      stream: stream.snapshots(),
+      stream: stream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container();

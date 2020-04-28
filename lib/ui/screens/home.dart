@@ -28,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Stream<QuerySnapshot> stream;
   String sortBy;
+  bool sortDesc;
   List filterBy;
 
   String uid;
@@ -41,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     log.info("Loading home screen");
     sortBy = 'name';
+    sortDesc = false;
     userService.getCurrentUser().then((user) {
         uid = user.uid;
         log.info("User $uid is logged in");
@@ -51,7 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void queryRecipes() {
+<<<<<<< HEAD
     stream = recipeService.getRecipes(uid, sortBy: sortBy, filterBy: filterBy);
+=======
+    stream = recipeService.getRecipes(uid, sortBy: sortBy, sortDesc: sortDesc, filterBy: filterBy); //todo: implement this again: filterBy: filterBy
+>>>>>>> fba8b7638bcf28274154d1c11c42f0050d740063
   }
 
   @override
@@ -148,21 +154,28 @@ class _HomeScreenState extends State<HomeScreen> {
     //https://medium.com/flutteropen/widgets-14-popupmenubutton-1f1437bbdce2
     itemBuilder: (context) => [
       PopupMenuItem(
-        value: "name",
+        value: "name:asc",
         child: Text("Name")
       ),
       PopupMenuItem(
-        value: "updated_at",
+        value: "viewed_at:desc",
+        child: Text("Last Viewed")
+      ),
+      PopupMenuItem(
+        value: "viewed_times:desc",
+        child: Text("Most Viewed")
+      ),
+      PopupMenuItem(
+        value: "updated_at:desc",
         child: Text("Last Updated")
       ),
     ],
-    initialValue: 'name',
-    onCanceled: () {
-      sortBy = sortBy;
-    },
+    initialValue: 'name:asc',
     onSelected: (value) {
       setState((){
-        sortBy = value;
+        var parts = value.split(":");
+        sortBy = parts[0];
+        sortDesc = parts[1] == 'desc';
         queryRecipes();
       });
     },
