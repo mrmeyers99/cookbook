@@ -16,12 +16,13 @@ class RecipeService {
     }
     ) {
     Query query = _recipes.where("uid", isEqualTo: uid);
+
     if (keywords != '' && keywords != null) {
       query = query.where("keywords", arrayContainsAny: keywords.toLowerCase().split(" "));
-    }
-    if (filterBy != [""] && filterBy != null) {
+    } else if (filterBy != [""] && filterBy != null) {
       query = query.where("tags", arrayContainsAny: filterBy);
     }
+
     query = query.orderBy(sortBy);
     if (maxResults > 0) {
       query = query.limit(maxResults);
