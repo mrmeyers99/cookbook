@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:home_cooked/model/recipe.dart';
 
 class RecipeService {
@@ -17,7 +18,7 @@ class RecipeService {
     if (keywords != '' && keywords != null) {
       query = query.where("keywords", arrayContainsAny: keywords.toLowerCase().split(" "));
     }
-    if (filterBy != [""] && filterBy != null) {
+    else if (!listEquals(filterBy,[""]) && !listEquals(filterBy,['all']) && filterBy != null) {
       query = query.where("tags", arrayContainsAny: filterBy);
     }
     query = query.orderBy(sortBy);
@@ -26,4 +27,23 @@ class RecipeService {
     }
     return query.snapshots();
   }
+
+  Future<List<Recipe>> getAllTags(String uid) async {
+      QuerySnapshot query = await recipes.where("uid", isEqualTo: uid).getDocuments();
+  
+      return query.documents.map(
+        (doc) => Recipe(
+          //doc.data['tags']
+        )
+      ).toList();
+    }
+
+  /*Stream<QuerySnapshot> getAllTags(String uid) {
+    Query query = recipes.where("uid", isEqualTo: uid);
+    return query.snapshots();
+  }*/
+  
+  }
+  
+  class RecipeTag {
 }

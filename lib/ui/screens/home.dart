@@ -8,7 +8,7 @@ import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/ui/widgets/recipe_card_thumbnail.dart';
 
 import '../../locator.dart';
-//import tags.dart
+import 'tags.dart';
 
 class HomeScreen extends StatefulWidget {
   final log = Logger('HomeScreen');
@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void queryRecipes() {
-    stream = recipeService.getRecipes(uid, sortBy: sortBy, filterBy: filterBy); //todo: implement this again: filterBy: filterBy
+    stream = recipeService.getRecipes(uid, sortBy: sortBy, filterBy: filterBy);
   }
 
   @override
@@ -102,11 +102,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 IconButton(
                   icon: Icon(Icons.loyalty),
                   onPressed: () {
-                    setState((){
-                      filterBy = ["Breakfast"]; //todo:change to be dynamic
-                      queryRecipes();
-                    });
-                    //navigateToTagScreen(context);
+                    //setState((){
+                    //  filterBy = ['all']; //todo:change to be dynamic
+                    //  queryRecipes();
+                    //});
+                    navigateToTagScreen(context);
                   },
                 ),
                 IconButton(
@@ -171,13 +171,13 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 
 
-/*   final List<String> sampleStartTag = ['dessert'];
+
   Future navigateToTagScreen(context) async {
     Navigator.push(context,
       MaterialPageRoute(
-        builder: (context) => TagScreen(),
+        builder: (context) => TagScreen(uid),
         ));
-} */
+}
 
 
 }
