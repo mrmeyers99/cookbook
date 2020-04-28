@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:home_cooked/service/RecipeService.dart';
 import 'package:home_cooked/service/UserService.dart';
 import '../../locator.dart';
-//import 'package:ordered_set/ordered_set.dart';
 
 
 
@@ -23,8 +22,6 @@ class TagScreen extends StatefulWidget {
 
 }
 
-List<String> litems = ["1","2","Third","4","5"];
-//List<String> litems2 = getAllTags().toList();
 
 
 class _TagScreenState extends State<TagScreen> {
@@ -32,10 +29,9 @@ class _TagScreenState extends State<TagScreen> {
   final UserService userService;
   final RecipeService recipeService;
   final uid;
+  var selected = [];
 
-  //List<QuerySnapshot> allTags;
-  //Stream<QuerySnapshot> allTags;
-  Future<Set<QuerySnapshot>> allTags;
+  Future<List<String>> allTagsFuture;
 
   _TagScreenState(this.uid):
     this.userService = locator.get<UserService>(),
@@ -43,45 +39,61 @@ class _TagScreenState extends State<TagScreen> {
 
 
   void queryAllTags() async {
-    print('working on getting tags');
-    var allTags = await recipeService.getAllTags(uid);
-    print(allTags);
+    //print('working on getting tags');
+    var allTagsFuture = await recipeService.getAllTags(uid);
+    //print(allTags);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Choose Filter'),
-        backgroundColor: Colors.redAccent,
-      ),
-      /*body: new ListView.builder(
-        itemCount: litems.length,
-        itemBuilder: (
-          BuildContext ctxt, int index) {
-            return new Text(litems[index]);
-          }
-        )
-        */
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Click button to display all tags'),
-            RaisedButton(
-              textColor: Colors.white,
-              color: Colors.redAccent,
-              child: Text('Get Tags'),
-              onPressed: () {
-                queryAllTags();
-                //Navigator.pop(context);
-              },
-            )
-          ],
+        backgroundColor: Colors.blue,
+        title: Text(
+          'Future Test'
+          ),
         ),
-      ),
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          child: FutureBuilder(
+            future: getFutureTags(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.hasData) {
+                return Center(
+                  child: ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (BuildContext context, int index) => FilterChip(
+                      label:Text(snapshot.data[index]),
+                      onSelected: (bool value) {
+                        if (selected.contains(index)) {
+                          selected.remove(index);
+                        } else {
+                          selected.add(index);
+                        }
+                      setState(() {});
+                      },
+                    selected: selected.contains(index),
+                    selectedColor: Colors.deepOrange,
+                    labelStyle: TextStyle(
+                     color: Colors.white,
+                     ),
+                    backgroundColor: Colors.green,
+                    ),
+                  )
+                );
+              } else {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            },
+          ),
+        )
     );
-  }
+    }
+
+    Future<List<String>> getFutureTags() async =>
+      await recipeService.getAllTags(uid);
+
 }
