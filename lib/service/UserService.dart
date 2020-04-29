@@ -10,7 +10,7 @@ class UserService {
   }
 
   Future<User> signIn(String email, String password) {
-    auth.signInWithEmailAndPassword(
+    return auth.signInWithEmailAndPassword(
       email: email,
       password: password)
     .then(_mapUser);
