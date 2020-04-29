@@ -11,6 +11,8 @@ class Recipe {
 
   Recipe({this.id, this.name, this.imageUrl, this.ingredients, this.instructions, this.tags, this.keywords});
 
+  Recipe.blank() : this(id: "", ingredients: List(), instructions: List());
+
   Recipe.fromMap(Map<String, dynamic> data, String id) : this(
     id: id,
     name: data['name'],

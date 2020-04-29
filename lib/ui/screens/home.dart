@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:home_cooked/model/user.dart';
 import 'package:home_cooked/routing_constants.dart';
 import 'package:home_cooked/service/RecipeService.dart';
 import 'package:home_cooked/service/UserService.dart';
+import 'package:home_cooked/ui/screens/edit_recipe.dart';
 import 'package:logging/logging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:home_cooked/model/recipe.dart';
@@ -31,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool sortDesc;
   List filterBy;
 
-  String uid;
+  User user;
 
   _HomeScreenState():
       this.userService = locator.get<UserService>(),
@@ -44,16 +46,16 @@ class _HomeScreenState extends State<HomeScreen> {
     sortBy = 'name';
     sortDesc = false;
     userService.getCurrentUser().then((user) {
-        uid = user.uid;
-        log.info("User $uid is logged in");
+        log.info("User ${user.email} is logged in");
         setState(() {
+          this.user = user;
           queryRecipes();
         });
     });
   }
 
   void queryRecipes() {
-    stream = recipeService.getRecipes(uid, sortBy: sortBy, sortDesc: sortDesc, filterBy: filterBy); //todo: implement this again: filterBy: filterBy
+    stream = recipeService.getRecipes(user.uid, sortBy: sortBy, sortDesc: sortDesc, filterBy: filterBy); //todo: implement this again: filterBy: filterBy
   }
 
   @override
@@ -77,19 +79,36 @@ class _HomeScreenState extends State<HomeScreen> {
             // Important: Remove any padding from the ListView.
             padding: EdgeInsets.zero,
             children: <Widget>[
-              DrawerHeader(
-                child: Text('Menu'),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                ),
+              UserAccountsDrawerHeader(
+                  accountName: Text(user.fullName),
+                  accountEmail: Text(user.email),
+                  currentAccountPicture: CircleAvatar(
+                    backgroundColor: Theme.of(context).platform == TargetPlatform.iOS
+                        ? Colors.blue
+                        : Colors.white,
+                    child: Text(
+                      user.initials,
+                      style: TextStyle(fontSize: 40.0),
+                    ),
+                  ),
+              ),
+              ListTile(
+                title: Text('New Recipe'),
+                trailing: Icon(Icons.add_circle_outline),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => EditRecipeScreen(Recipe.blank()),
+                  ));
+                },
               ),
               ListTile(
                 title: Text('Logout'),
+                trailing: Icon(Icons.exit_to_app),
                 onTap: () {
                   userService.signOut().then((result) =>
                       Navigator.pushReplacementNamed(context, LoginViewRoute));
                 },
-              )
+              ),
             ],
           ),
         ),
@@ -116,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     showSearch(
                       context: context,
-                      delegate: RecipeSearchDelegate(uid),
+                      delegate: RecipeSearchDelegate(user.uid),
                     );
                   },
                 ),
@@ -184,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future navigateToTagScreen(context) async {
     Navigator.push(context,
       MaterialPageRoute(
-        builder: (context) => TagScreen(uid),
+        builder: (context) => TagScreen(user.uid),
         ));
 }
 

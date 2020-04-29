@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:logging/logging.dart';
@@ -36,26 +37,34 @@ class RecipeService {
   }
 
   Future<List<String>> getAllTags(String uid) async {
-      QuerySnapshot query = await _recipes.where("uid", isEqualTo: uid).getDocuments();
-      var tagSet = Set<String>();
-      query.documents
-          .where((doc) => doc.data['tags'] != null)
-          .forEach((doc) => tagSet.addAll(List.from(doc.data['tags'])));
-      var tagList = tagSet.toList();
-      tagList.sort();
-      return tagList;
-    }
-
-  /*Stream<QuerySnapshot> getAllTags(String uid) {
-    Query query = recipes.where("uid", isEqualTo: uid);
-    return query.snapshots();
-  }*/
+    QuerySnapshot query = await _recipes.where("uid", isEqualTo: uid).getDocuments();
+    var tagSet = Set<String>();
+    query.documents
+        .where((doc) => doc.data['tags'] != null)
+        .forEach((doc) => tagSet.addAll(List.from(doc.data['tags'])));
+    var tagList = tagSet.toList();
+    tagList.sort();
+    return tagList;
+  }
 
   Stream<DocumentSnapshot> getRecipe(String id) {
     return _recipes.document(id).snapshots();
   }
 
-  Future<Map<String, dynamic>> updateRecipe(String id, {name: String, ingredients: String, instructions}) {
+  Future<String> updateRecipe(String id, {name: String, ingredients: String, instructions}) {
+    if (id == "") {
+      return FirebaseAuth.instance.currentUser().then((user) => _recipes.add({
+        "name": name,
+        "ingredients": ingredients,
+        "instructions": instructions,
+        "keywords": _buildKeywords(name, ingredients),
+        "tags": List(),
+        "updated_at": FieldValue.serverTimestamp(),
+        'viewed_at': FieldValue.serverTimestamp(),
+        'viewed_times': 1,
+        'uid': user.uid,
+      })).then((ref) => ref.documentID);
+    }
     var recipeRef = _recipes.document(id);
     return _db.runTransaction((transaction) {
       return transaction.get(recipeRef).then((recipeDoc) {
@@ -70,7 +79,7 @@ class RecipeService {
           "updated_at": FieldValue.serverTimestamp()
         });
       });
-    });
+    }).then((value) => id);
   }
 
   List<String> _buildKeywords(String name, List<String> ingredients) {

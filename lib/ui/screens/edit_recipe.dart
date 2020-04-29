@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:home_cooked/locator.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/service/RecipeService.dart';
+import 'package:home_cooked/ui/screens/individual_recipe.dart';
+import 'package:logging/logging.dart';
 
 class EditRecipeScreen extends StatefulWidget {
 
@@ -21,7 +23,7 @@ class EditRecipeScreen extends StatefulWidget {
 }
 
 class _EditRecipeScreenState extends State<EditRecipeScreen> {
-
+  final log = Logger('_EditRecipeScreenState');
   final Recipe recipe;
   final TextEditingController nameController;
   final TextEditingController ingredientsController;
@@ -94,8 +96,13 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                                 ingredients: ingredientsController.text.split("\n"),
                                 instructions: instructionsController.text.split("\n"))
                             .then((result) {
-                              Navigator.pop(context);
-                            });
+                              if (recipe.id == "") {
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecipeScreen(result)));
+                              } else {
+                                Navigator.pop(context);
+                              }
+                            })
+                            .catchError((err) => log.severe("Error saving recipe", err) /*todo: display error to user*/);
                           }
                         },
                         child: Text('Save'),
