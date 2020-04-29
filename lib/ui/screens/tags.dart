@@ -48,7 +48,11 @@ class _TagScreenState extends State<TagScreen> {
           IconButton(
                   icon: Icon(Icons.check),
                   onPressed: () {
+                    if (selectedIdx.length >0) {
                     Navigator.pop(context,selectedIdx.map((index) => allTags[index]).toList());
+                    } else {Navigator
+                    .pop(context,[""]); // If none selected, don't filter.
+                    }
                   },
                 ), 
         ],
