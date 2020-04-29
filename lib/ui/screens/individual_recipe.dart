@@ -96,7 +96,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
     return StreamBuilder(
       stream: stream,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData || snapshot.data.data == null) {
           return Container();
         }
 
@@ -119,7 +119,40 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
                             MaterialPageRoute(
                               builder: (context) => EditRecipeScreen(recipe),
                             ));
-                      })],
+                      }),
+                      IconButton(icon: Icon(Icons.delete), onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext alertContext) {
+                            // return object of type Dialog
+                            return AlertDialog(
+                              title: new Text("Are you sure?"),
+                              content: new Text("Are you sure you want to delete recipe ${recipe.name}?"),
+                              actions: <Widget>[
+                                // usually buttons at the bottom of the dialog
+                                new FlatButton(
+                                  child: new Text("Cancel"),
+                                  onPressed: () {
+                                    Navigator.of(alertContext).pop(false);
+                                  },
+                                ),
+                                new FlatButton(
+                                  child: new Text("Delete"),
+                                  onPressed: () {
+                                    Navigator.of(alertContext).pop(true);
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ).then((shouldDelete) {
+                          if (shouldDelete) {
+                            _recipeService.deleteRecipe(recipe.id);
+                            Navigator.pop(context);
+                          }
+                        });
+                      }),
+                    ],
                     flexibleSpace: FlexibleSpaceBar(
                         centerTitle: true,
                         title: Text(recipe.name,

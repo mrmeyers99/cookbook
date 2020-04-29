@@ -51,6 +51,10 @@ class RecipeService {
     return _recipes.document(id).snapshots();
   }
 
+  Future<void> deleteRecipe(String id) {
+    return _recipes.document(id).delete();
+  }
+
   Future<String> updateRecipe(String id, {name: String, ingredients: String, instructions}) {
     if (id == "") {
       return FirebaseAuth.instance.currentUser().then((user) => _recipes.add({

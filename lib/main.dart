@@ -9,21 +9,31 @@ import 'ui/screens/splash.dart';
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
 void main() {
-  Logger.root.level = Level.ALL; // defaults to Level.INFO
-  Logger.root.onRecord.listen((record) {
-    print('${record.level.name}: ${record.time}: ${record.message}');
-  });
+  var list = [1, 2, 3];
+  var map = {
+    1: "one",
+    2: "two",
+    3: "three",
+  };
 
-  setupLocator();
 
-  runApp(MaterialApp(
-    title: 'Cookbook',
-    theme: ThemeData(
-      primarySwatch: Colors.blue,
-    ),
-    home: SplashScreen(),
-    onGenerateRoute: router.generateRoute,
-    initialRoute: HomeViewRoute,
-    navigatorObservers: [routeObserver],
-  ));
 }
+//void main() {
+//  Logger.root.level = Level.ALL; // defaults to Level.INFO
+//  Logger.root.onRecord.listen((record) {
+//    print('${record.level.name}: ${record.time}: ${record.message}');
+//  });
+//
+//  setupLocator();
+//
+//  runApp(MaterialApp(
+//    title: 'Cookbook',
+//    theme: ThemeData(
+//      primarySwatch: Colors.blue,
+//    ),
+//    home: SplashScreen(),
+//    onGenerateRoute: router.generateRoute,
+//    initialRoute: HomeViewRoute,
+//    navigatorObservers: [routeObserver],
+//  ));
+//}
