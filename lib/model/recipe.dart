@@ -9,7 +9,14 @@ class Recipe {
   final List<String> tags;
   final List<String> keywords;
 
-  Recipe({this.id, this.name, this.imageUrl, this.ingredients, this.instructions, this.tags, this.keywords});
+  final String prepTime;
+  final String cookTime;
+  final String readyTime;
+  final int servings;
+  final String source;
+  final String notes;
+
+  Recipe({this.id, this.name, this.imageUrl, this.ingredients, this.instructions, this.tags, this.keywords, this.prepTime, this.cookTime, this.readyTime, this.servings, this.source, this.notes});
 
   Recipe.blank() : this(id: "", ingredients: List(), instructions: List());
 
@@ -21,6 +28,12 @@ class Recipe {
     instructions: _buildList(data, 'instructions'),
     tags: _buildList(data, 'tags'),
     keywords: _buildList(data, 'keywords'),
+    prepTime: data['prepTime'],
+    cookTime: data['cookTime'],
+    readyTime: data['readyTime'],
+    servings: data['servings'],
+    source: data['source'],
+    notes: data['notes'],
   );
 
   static List<String> _buildList(map, key) => map[key] == null ? List() : List.from(map[key]);
