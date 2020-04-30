@@ -36,7 +36,7 @@ class RecipeService {
     return query.snapshots();
   }
 
-  Future<List<String>> getAllTags(String uid) async {
+  Future<List<String>> getTagList(String uid) async {
     QuerySnapshot query = await _recipes.where("uid", isEqualTo: uid).getDocuments();
     var tagSet = Set<String>();
     query.documents

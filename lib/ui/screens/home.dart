@@ -123,10 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 IconButton(
                   icon: Icon(Icons.loyalty),
                   onPressed: () {
-                    //setState((){
-                    //  filterBy = ['all']; //todo:change to be dynamic
-                    //  queryRecipes();
-                    //});
                     navigateToTagScreen(context); //TODO: pass the current filterBy to the tags screen
                   },
                 ),
@@ -203,12 +199,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future navigateToTagScreen(context) async {
     filterBy = await Navigator.push(context,
       MaterialPageRoute(
-        builder: (context) => TagScreen(user.uid),
+        builder: (context) => TagScreen(user.uid, filterBy),
         ));
     setState(() {
-          queryRecipes();
-        });
-}
+      queryRecipes();
+    });
+  }
 
 
 }
