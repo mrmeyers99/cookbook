@@ -90,6 +90,36 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
     );
   }
 
+  Widget buildOverview(Recipe recipe) {
+    return Card(child: ListView(
+      children: [
+        recipe.imageUrl != null ? Image.network(
+          recipe.imageUrl, //todo use cache
+          fit: BoxFit.cover,
+        ) : Container(),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Column(children: [
+              Text("Prep Time:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(recipe.prepTime == null ? '' : recipe.prepTime),
+            ]),
+            Column(children: [
+              Text("Cook Time:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(recipe.cookTime == null ? '' : recipe.cookTime)
+            ]),
+            Column(children: [
+              Text("Ready Time:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(recipe.readyTime == null ? '' : recipe.readyTime)
+            ]),
+          ]
+        )
+      ],
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -104,12 +134,11 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
 
         return Scaffold(
           body: DefaultTabController(
-            length: 2,
+            length: 3,
             child: NestedScrollView(
               headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                 return <Widget>[
                   SliverAppBar(
-                    expandedHeight: recipe.imageUrl != null ? 200.0 : 20.0,
                     floating: false,
                     pinned: true,
                     actions: <Widget>[
@@ -160,10 +189,6 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
                               color: Colors.white,
                               fontSize: 16.0,
                             )),
-                        background: recipe.imageUrl != null ? Image.network(
-                          recipe.imageUrl, //todo use cache
-                          fit: BoxFit.cover,
-                        ) : null
                     ),
                   ),
                   SliverPersistentHeader(
@@ -172,6 +197,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
                         labelColor: Colors.black87,
                         unselectedLabelColor: Colors.grey,
                         tabs: [
+                          Tab(icon: Icon(Icons.fastfood), text: "Overview"),
                           Tab(icon: Icon(Icons.fastfood), text: "Ingredients"),
                           Tab(icon: Icon(Icons.format_list_numbered), text: "Instructions"),
                         ],
@@ -183,6 +209,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
               },
               body: TabBarView(
                 children: [
+                  buildOverview(recipe),
                   buildListView(Section.fromMarkup(recipe.ingredients)),
                   buildListView(Section.fromMarkup(recipe.instructions)),
                 ],
