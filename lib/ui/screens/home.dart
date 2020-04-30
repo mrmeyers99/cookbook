@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_cooked/model/user.dart';
 import 'package:home_cooked/routing_constants.dart';
@@ -32,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String sortBy;
   bool sortDesc;
   List filterBy;
+  var tagButtonColor = Colors.white;
 
   User user;
 
@@ -122,8 +124,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 _sortPopup(),
                 IconButton(
                   icon: Icon(Icons.loyalty),
+                  color: tagButtonColor,
                   onPressed: () {
-                    navigateToTagScreen(context); //TODO: pass the current filterBy to the tags screen
+                    navigateToTagScreen(context);
                   },
                 ),
                 IconButton(
@@ -201,9 +204,16 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(
         builder: (context) => TagScreen(user.uid, filterBy),
         ));
-    setState(() {
-      queryRecipes();
-    });
+    if (filterBy != null) { // will be null if the back arrow was pressed on tag screen
+      setState(() {
+        queryRecipes();
+        if (listEquals(filterBy,[""])) {
+          tagButtonColor = Colors.white;
+        } else {
+          tagButtonColor = Colors.orangeAccent;
+        }
+      });
+    }
   }
 
 
