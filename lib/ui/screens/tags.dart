@@ -7,8 +7,9 @@ import '../../locator.dart';
 
 class TagScreen extends StatefulWidget {
   final uid;
+  final preexistingFilters;
 
-  TagScreen(this.uid);
+  TagScreen(this.uid, this.preexistingFilters);
 
   @override
   State<StatefulWidget> createState() {
@@ -19,8 +20,9 @@ class TagScreen extends StatefulWidget {
 class _TagScreenState extends State<TagScreen> {
   final UserService userService;
   final RecipeService recipeService;
+  List<String> preexistingFilters;
+  List<String> tagList;
   var selectedIdx = [];
-  List<String> allTags;
 
   _TagScreenState()
       : this.userService = locator.get<UserService>(),
@@ -34,11 +36,11 @@ class _TagScreenState extends State<TagScreen> {
           title: Text('Choose Tags'),
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.check),
+              icon: Icon(Icons.check), // todo: make check only appear if selection has changed
               onPressed: () {
                 if (selectedIdx.length > 0) {
                   Navigator.pop(context,
-                      selectedIdx.map((index) => allTags[index]).toList());
+                      selectedIdx.map((index) => tagList[index]).toList());
                 } else {
                   Navigator.pop(context, [""]); // If none selected, don't filter.
                 }
@@ -53,7 +55,16 @@ class _TagScreenState extends State<TagScreen> {
             future: getFutureTags(),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.hasData) {
-                allTags = snapshot.data;
+                tagList = snapshot.data; // tagList variable mostly for convenience
+
+                // initialize the chips if there were already tags selected
+                // is this the only way to initialize a future? Seems a little weird.
+                if (preexistingFilters != null && selectedIdx.isEmpty) {
+                  for (var i = 0; i < preexistingFilters.length; i++) {
+                    selectedIdx.add(tagList.indexWhere((tagName) => tagName == preexistingFilters[i]));
+                  }
+                  preexistingFilters = null; // avoid any additional initializations of selectedIdx
+                }
                 return Center(
                     child: ListView.builder(
                   itemCount: snapshot.data.length,
@@ -86,5 +97,5 @@ class _TagScreenState extends State<TagScreen> {
         ));
   }
 
-  Future<List<String>> getFutureTags() => recipeService.getAllTags(widget.uid);
+  Future<List<String>> getFutureTags() => recipeService.getTagList(widget.uid);
 }
