@@ -6,7 +6,7 @@ import '../../locator.dart';
 
 class TagScreen extends StatefulWidget {
   final uid;
-  final List<String> preexistingFilters;
+  final List preexistingFilters;
 
   TagScreen(this.uid, this.preexistingFilters);
 
@@ -19,7 +19,7 @@ class TagScreen extends StatefulWidget {
 class _TagScreenState extends State<TagScreen> {
   final UserService userService;
   final RecipeService recipeService;
-  final List<String> selectedTags = [];
+  final List selectedTags = [];
 
   _TagScreenState()
       : this.userService = locator.get<UserService>(),

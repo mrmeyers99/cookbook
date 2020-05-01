@@ -33,7 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String sortBy;
   bool sortDesc;
   List filterBy;
-  var tagButtonColor = Colors.white;
+  //var tagButtonColor = Colors.white;
+  bool clearTagsButtonVisible;
 
   User user;
 
@@ -47,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     log.info("Loading home screen");
     sortBy = 'name';
     sortDesc = false;
+    clearTagsButtonVisible = false;
     userService.getCurrentUser().then((user) {
         log.info("User ${user.email} is logged in");
         setState(() {
@@ -122,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _sortPopup(),
                 IconButton(
                   icon: Icon(Icons.loyalty),
-                  color: tagButtonColor,
+                  color: Colors.white,//tagButtonColor,
                   onPressed: () {
                     navigateToTagScreen(context);
                   },
@@ -161,10 +163,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {}, //todo: implement
-          label: Row(
+        floatingActionButton: new Visibility(
+          visible: clearTagsButtonVisible,
+          child: new FloatingActionButton.extended(
+            onPressed: () {
+              setState(() {
+                filterBy = [];
+                clearTagsButtonVisible = false;
+                queryRecipes();
+              });
+            },
+            label: Row(
             children: <Widget>[Text('Clear '),Icon(Icons.loyalty)],
+            )
           ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -215,9 +226,11 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         queryRecipes();
         if (listEquals(filterBy,[])) {
-          tagButtonColor = Colors.white;
+          //tagButtonColor = Colors.white;
+          clearTagsButtonVisible = false;
         } else {
-          tagButtonColor = Colors.orangeAccent;
+          //tagButtonColor = Colors.orangeAccent;
+          clearTagsButtonVisible = true;
         }
       });
     }
