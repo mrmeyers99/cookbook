@@ -28,12 +28,22 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
   final TextEditingController nameController;
   final TextEditingController ingredientsController;
   final TextEditingController instructionsController;
+  final TextEditingController prepTimeController;
+  final TextEditingController cookTimeController;
+  final TextEditingController readyTimeController;
+  final TextEditingController sourceController;
+  final TextEditingController notesController;
   final RecipeService _recipeService;
 
   _EditRecipeScreenState(this.recipe):
         this.nameController = TextEditingController(text: recipe.name),
         this.ingredientsController = TextEditingController(text: recipe.ingredients.join("\n")),
         this.instructionsController = TextEditingController(text: recipe.instructions.join("\n")),
+        this.prepTimeController = TextEditingController(text: recipe.prepTime),
+        this.cookTimeController = TextEditingController(text: recipe.cookTime),
+        this.readyTimeController = TextEditingController(text: recipe.readyTime),
+        this.sourceController = TextEditingController(text: recipe.source),
+        this.notesController = TextEditingController(text: recipe.notes),
         this._recipeService = locator.get<RecipeService>();
 
   // Create a global key that uniquely identifies the Form widget
@@ -75,13 +85,51 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                         maxLines: null,
                   )),
                   ListTile(
-                    leading: Icon(Icons.format_list_numbered),
-                    title:
+                      leading: Icon(Icons.format_list_numbered),
+                      title:
                       TextFormField(
                         controller: instructionsController,
                         keyboardType: TextInputType.multiline,
                         textInputAction: TextInputAction.newline,
                         decoration: InputDecoration(hintText: "Instructions"),
+                        maxLines: null,
+                      )),
+                  ListTile(
+                    leading: Icon(Icons.timer),
+                    title:
+                      TextFormField(
+                        controller: prepTimeController,
+                        decoration: InputDecoration(hintText: "Prep Time"),
+                  )),
+                  ListTile(
+                    leading: Icon(Icons.timer),
+                    title:
+                      TextFormField(
+                        controller: cookTimeController,
+                        decoration: InputDecoration(hintText: "Cook Time"),
+                  )),
+                  ListTile(
+                    leading: Icon(Icons.timer),
+                    title:
+                      TextFormField(
+                        controller: readyTimeController,
+                        decoration: InputDecoration(hintText: "Ready Time"),
+                  )),
+                  ListTile(
+                    leading: Icon(Icons.bookmark),
+                      title:
+                      TextFormField(
+                        controller: sourceController,
+                        decoration: InputDecoration(hintText: "Source"),
+                  )),
+                  ListTile(
+                    leading: Icon(Icons.note),
+                    title:
+                      TextFormField(
+                        controller: notesController,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        decoration: InputDecoration(hintText: "Notes"),
                         maxLines: null,
                   )),
                     Padding(
@@ -94,7 +142,13 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                             _recipeService.updateRecipe(recipe.id,
                                 name: nameController.text,
                                 ingredients: ingredientsController.text.split("\n"),
-                                instructions: instructionsController.text.split("\n"))
+                                instructions: instructionsController.text.split("\n"),
+                                prepTime: prepTimeController.text,
+                                cookTime: cookTimeController.text,
+                                readyTime: readyTimeController.text,
+                                source: sourceController.text,
+                                notes: notesController.text,
+                            )
                             .then((result) {
                               if (recipe.id == "") {
                                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecipeScreen(result)));
