@@ -55,12 +55,17 @@ class RecipeService {
     return _recipes.document(id).delete();
   }
 
-  Future<String> updateRecipe(String id, {name: String, ingredients: String, instructions}) {
+  Future<String> updateRecipe(String id, {name: String, ingredients: String, instructions: String, prepTime: String, cookTime: String, readyTime: String, source: String, notes: String}) {
     if (id == "") {
       return FirebaseAuth.instance.currentUser().then((user) => _recipes.add({
         "name": name,
         "ingredients": ingredients,
         "instructions": instructions,
+        "prepTime": prepTime,
+        "cookTime": cookTime,
+        "readyTime": readyTime,
+        "source": source,
+        "notes": notes,
         "keywords": _buildKeywords(name, ingredients),
         "tags": List(),
         "updated_at": FieldValue.serverTimestamp(),
@@ -79,6 +84,11 @@ class RecipeService {
           "name": name,
           "ingredients": ingredients,
           "instructions": instructions,
+          "prepTime": prepTime,
+          "cookTime": cookTime,
+          "readyTime": readyTime,
+          "source": source,
+          "notes": notes,
           "keywords": _buildKeywords(name, ingredients),
           "updated_at": FieldValue.serverTimestamp()
         });
