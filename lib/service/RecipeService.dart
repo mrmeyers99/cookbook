@@ -16,7 +16,7 @@ class RecipeService {
   Stream<QuerySnapshot> getRecipes(String uid, {
     String sortBy = 'name',
     bool sortDesc = false,
-    List filterBy = const [""],
+    List filterBy = const [],
     String keywords = '',
     int maxResults = 0
     }
@@ -25,7 +25,7 @@ class RecipeService {
 
     if (keywords != '' && keywords != null) {
       query = query.where("keywords", arrayContainsAny: keywords.toLowerCase().split(" "));
-    } else if (!listEquals(filterBy,[""]) && !listEquals(filterBy,['all']) && filterBy != null) {
+    } else if (!listEquals(filterBy,[]) && !listEquals(filterBy,['all']) && filterBy != null) {
       query = query.where("tags", arrayContainsAny: filterBy);
     }
     log.info("sorting by $sortBy, descending = $sortDesc");

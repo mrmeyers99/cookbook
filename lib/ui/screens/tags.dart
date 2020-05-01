@@ -44,12 +44,12 @@ class _TagScreenState extends State<TagScreen> {
               icon: Icon(Icons.check),
               // todo: make check only appear if selection has changed
               onPressed: () {
-                if (selectedTags.length > 0) {
+                //if (selectedTags.length > 0) {
                   Navigator.pop(context, selectedTags);
-                } else {
-                  Navigator.pop(
-                      context, [""]); // If none selected, don't filter.
-                }
+                //} else {
+                  //Navigator.pop(
+                      //context, [""]); // If none selected, don't filter.
+                //}
               },
             ),
           ],

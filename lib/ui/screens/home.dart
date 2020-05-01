@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (filterBy != null) { // will be null if the back arrow was pressed on tag screen
       setState(() {
         queryRecipes();
-        if (listEquals(filterBy,[""])) {
+        if (listEquals(filterBy,[])) {
           tagButtonColor = Colors.white;
         } else {
           tagButtonColor = Colors.orangeAccent;
