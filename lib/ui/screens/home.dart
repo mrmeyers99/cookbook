@@ -68,9 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
       log.info("Recipes have not been loaded yet");
       return Scaffold(
         body: Center(
-          child: Container(
-            child: Text("Loading recipes..."),
-          ),
+          child: CircularProgressIndicator(),
         ),
       );
     }
