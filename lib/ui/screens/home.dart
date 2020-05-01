@@ -159,7 +159,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-        ]));
+        ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {}, //todo: implement
+          label: Row(
+            children: <Widget>[Text('Clear '),Icon(Icons.loyalty)],
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
   }
 
     Widget _sortPopup() => PopupMenuButton<String>(
@@ -205,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (filterBy != null) { // will be null if the back arrow was pressed on tag screen
       setState(() {
         queryRecipes();
-        if (listEquals(filterBy,[""])) {
+        if (listEquals(filterBy,[])) {
           tagButtonColor = Colors.white;
         } else {
           tagButtonColor = Colors.orangeAccent;
