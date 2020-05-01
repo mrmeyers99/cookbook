@@ -4,6 +4,7 @@ import 'package:home_cooked/service/RecipeService.dart';
 import 'package:logging/logging.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../main.dart';
 import 'edit_recipe.dart';
@@ -97,6 +98,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
           recipe.imageUrl, //todo use cache
           fit: BoxFit.cover,
         ) : Container(),
+        Divider(),
         Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -115,9 +117,10 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
             ]),
           ]
         ),
+        Divider(),
         recipe.source == null ? Container() : ListTile(
           title: Text("Source"),
-          subtitle: Text(recipe.source == null ? '' : recipe.source),
+          subtitle: getSourceText(recipe.source),
         ),
         recipe.notes == null ? Container() : ListTile(
           title: Text("Notes"),
@@ -227,6 +230,16 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
         );
       }
     );
+  }
+
+  Widget getSourceText(String source) {
+    if (source == null) {
+      return Text('');
+    } else if (source.startsWith("http")) {
+      return InkWell(child: Text(source), onTap: () => launch(source));
+    } else {
+      return Text(source);
+    }
   }
 }
 
