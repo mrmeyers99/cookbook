@@ -161,7 +161,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-        ]));
+        ],
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {}, //todo: implement
+          label: Row(
+            children: <Widget>[Text('Clear '),Icon(Icons.loyalty)],
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
   }
 
     Widget _sortPopup() => PopupMenuButton<String>(
