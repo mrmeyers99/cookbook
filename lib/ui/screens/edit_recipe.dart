@@ -95,21 +95,36 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                         maxLines: null,
                       )),
                   ListTile(
-                    leading: Icon(Icons.timer),
+                    leading: Column(
+                      children: [
+                        Icon(Icons.timer),
+                        Text('Prep')
+                      ]
+                    ),
                     title:
                       TextFormField(
                         controller: prepTimeController,
                         decoration: InputDecoration(hintText: "Prep Time"),
                   )),
                   ListTile(
-                    leading: Icon(Icons.timer),
+                    leading: Column(
+                      children: [
+                        Icon(Icons.timer),
+                        Text('Cook')
+                      ]
+                    ),
                     title:
                       TextFormField(
                         controller: cookTimeController,
                         decoration: InputDecoration(hintText: "Cook Time"),
                   )),
                   ListTile(
-                    leading: Icon(Icons.timer),
+                    leading: Column(
+                      children: [
+                        Icon(Icons.timer),
+                        Text('Ready')
+                      ]
+                    ),
                     title:
                       TextFormField(
                         controller: readyTimeController,

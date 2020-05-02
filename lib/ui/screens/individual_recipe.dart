@@ -122,6 +122,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
           title: Text("Source"),
           subtitle: getSourceText(recipe.source),
         ),
+        Divider(),
         recipe.notes == null ? Container() : ListTile(
           title: Text("Notes"),
           subtitle: Text(recipe.notes == null ? '' : recipe.notes),
