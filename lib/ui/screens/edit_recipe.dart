@@ -57,6 +57,15 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
       Scaffold(
           appBar: AppBar(
             title: Text("Edit Recipe"),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.check),
+                // todo: make check only appear if selection has changed?
+                onPressed: () {
+                  saveRecipe();
+                },
+              ),
+            ],
           ),
           body:
             Form(
@@ -153,26 +162,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                         onPressed: () {
                           // Validate returns true if the form is valid, or false
                           // otherwise.
-                          if (_formKey.currentState.validate()) {
-                            _recipeService.updateRecipe(recipe.id,
-                                name: nameController.text,
-                                ingredients: ingredientsController.text.split("\n"),
-                                instructions: instructionsController.text.split("\n"),
-                                prepTime: prepTimeController.text,
-                                cookTime: cookTimeController.text,
-                                readyTime: readyTimeController.text,
-                                source: sourceController.text,
-                                notes: notesController.text,
-                            )
-                            .then((result) {
-                              if (recipe.id == "") {
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecipeScreen(result)));
-                              } else {
-                                Navigator.pop(context);
-                              }
-                            })
-                            .catchError((err) => log.severe("Error saving recipe", err) /*todo: display error to user*/);
-                          }
+                          saveRecipe();
                         },
                         child: Text('Save'),
                       ),
@@ -181,5 +171,28 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
               )
             ))
       );
+  }
+
+  void saveRecipe () {
+    if (_formKey.currentState.validate()) {
+      _recipeService.updateRecipe(recipe.id,
+          name: nameController.text,
+          ingredients: ingredientsController.text.split("\n"),
+          instructions: instructionsController.text.split("\n"),
+          prepTime: prepTimeController.text,
+          cookTime: cookTimeController.text,
+          readyTime: readyTimeController.text,
+          source: sourceController.text,
+          notes: notesController.text,
+      )
+      .then((result) {
+        if (recipe.id == "") {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecipeScreen(result)));
+        } else {
+          Navigator.pop(context);
+        }
+      })
+      .catchError((err) => log.severe("Error saving recipe", err) /*todo: display error to user*/);
+    }
   }
 }
