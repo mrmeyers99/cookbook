@@ -9,6 +9,8 @@ import 'package:home_cooked/service/RecipeService.dart';
 import 'package:home_cooked/ui/screens/individual_recipe.dart';
 import 'package:logging/logging.dart';
 
+import 'tags.dart';
+
 class EditRecipeScreen extends StatefulWidget {
 
   final Recipe recipe;
@@ -33,6 +35,8 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
   final TextEditingController readyTimeController;
   final TextEditingController sourceController;
   final TextEditingController notesController;
+  List tagsList;
+  final TextEditingController tagsController;
   final RecipeService _recipeService;
 
   _EditRecipeScreenState(this.recipe):
@@ -44,6 +48,8 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
         this.readyTimeController = TextEditingController(text: recipe.readyTime),
         this.sourceController = TextEditingController(text: recipe.source),
         this.notesController = TextEditingController(text: recipe.notes),
+        this.tagsList = recipe.tags,
+        this.tagsController = TextEditingController(text: recipe.tags.join("\n")),
         this._recipeService = locator.get<RecipeService>();
 
   // Create a global key that uniquely identifies the Form widget
@@ -156,22 +162,41 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                         decoration: InputDecoration(hintText: "Notes"),
                         maxLines: null,
                   )),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: RaisedButton(
+                    ListTile(
+                      leading: Icon(Icons.loyalty),
+                      title: TextFormField(
+                          controller: tagsController,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          decoration: InputDecoration(hintText: "Tags"),
+                          maxLines: null,
+                        ),
+                      trailing: RaisedButton(
                         onPressed: () {
-                          // Validate returns true if the form is valid, or false
-                          // otherwise.
-                          saveRecipe();
+                          // implement
                         },
-                        child: Text('Save'),
+                      child: Text('Choose'),
                       ),
                     ),
-                  ]
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    /*child: RaisedButton(
+                      onPressed: () {
+                        // Validate returns true if the form is valid, or false
+                        // otherwise.
+                        saveRecipe();
+                      },
+                      child: Text('Save'),
+                    ),*/
+                  ),
+                ]
               )
             ))
       );
   }
+
+
+
 
   void saveRecipe () {
     if (_formKey.currentState.validate()) {
@@ -184,6 +209,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
           readyTime: readyTimeController.text,
           source: sourceController.text,
           notes: notesController.text,
+          tags: tagsController.text.split("\n"),
       )
       .then((result) {
         if (recipe.id == "") {
@@ -195,4 +221,13 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
       .catchError((err) => log.severe("Error saving recipe", err) /*todo: display error to user*/);
     }
   }
+
+  /*Future navigateToTagScreen(context) async {
+    tagsList = await Navigator.push(context,
+      MaterialPageRoute(
+        builder: (context) => TagScreen(tagsList),
+        ));
+    }*/
+
+
 }

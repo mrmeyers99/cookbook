@@ -31,7 +31,6 @@ class RecipeThumbnail extends StatelessWidget {
         _recipeService.updateTags(recipe.id, recipe.tags);
       },
       child: Card(
-        //color: recipe.tags.contains('queue') == true ? Colors.teal : Colors.white,
         child: Container(
           margin: const EdgeInsets.all(0),
           padding: const EdgeInsets.all(0),
