@@ -208,7 +208,8 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
                         labelColor: Colors.black87,
                         unselectedLabelColor: Colors.grey,
                         tabs: [
-                          Tab(icon: Icon(Icons.fastfood), text: "Overview"),
+                          Tab(icon: Icon(Icons.local_see), text: "Overview"),
+                          //Other relevant ones are restaurant, restaurant_menu
                           Tab(icon: Icon(Icons.fastfood), text: "Ingredients"),
                           Tab(icon: Icon(Icons.format_list_numbered), text: "Instructions"),
                         ],

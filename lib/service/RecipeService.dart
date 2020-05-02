@@ -55,7 +55,7 @@ class RecipeService {
     return _recipes.document(id).delete();
   }
 
-  Future<String> updateRecipe(String id, {name: String, ingredients: String, instructions: String, prepTime: String, cookTime: String, readyTime: String, source: String, notes: String}) {
+  Future<String> updateRecipe(String id, {name: String, ingredients: String, instructions: String, prepTime: String, cookTime: String, readyTime: String, source: String, notes: String, tags: List}) {
     if (id == "") {
       return FirebaseAuth.instance.currentUser().then((user) => _recipes.add({
         "name": name,
@@ -67,7 +67,7 @@ class RecipeService {
         "source": source,
         "notes": notes,
         "keywords": _buildKeywords(name, ingredients),
-        "tags": List(),
+        "tags": tags,
         "updated_at": FieldValue.serverTimestamp(),
         'viewed_at': FieldValue.serverTimestamp(),
         'viewed_times': 1,
@@ -127,6 +127,23 @@ class RecipeService {
     })
     .then((value) => {})
     .catchError((err) => log.warning("Error marking recipe as viewed", err));
+  }
+
+
+  Future<void> updateTags(String id, List newTagList) {
+    var recipeRef = _recipes.document(id);
+    return _db.runTransaction((transaction) {
+      return transaction.get(recipeRef).then((recipeDoc) {
+        if (!recipeDoc.exists) {
+          throw "Recipe does not exist!";
+        }
+        transaction.update(recipeRef, {
+          "tags": newTagList
+        });
+      });
+    })
+    .then((value) => {})
+    .catchError((err) => log.warning("Error updating recipe tags", err));
   }
 
 }
