@@ -91,6 +91,9 @@ class Section {
     return list
         .sublist(begin, end)
         .where((s) => !s.startsWith("//"))
-        .toList();
+        .skipWhile((s) => s.isEmpty)
+        .toList()
+        .reversed.skipWhile((s) => s.isEmpty).toList()
+        .reversed.toList();
   }
 }

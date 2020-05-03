@@ -53,4 +53,18 @@ void main() {
     ]));
   });
 
+  test('Section parser should remove blank lines at the beginning or end', () {
+    var sections = Section.fromMarkup(["*a*", "", "b", ""]);
+    expect(sections, containsAllInOrder([
+      Section("a", ["b"]),
+    ]));
+  });
+
+  test('Section parser should remove only one blank line if there is only one item', () {
+    var sections = Section.fromMarkup(["*a*", ""]);
+    expect(sections, containsAllInOrder([
+      Section("a", []),
+    ]));
+  });
+
 }

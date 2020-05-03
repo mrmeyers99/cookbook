@@ -69,9 +69,10 @@ class RecipeService {
         "notes": notes,
         "keywords": _buildKeywords(name, ingredients),
         "tags": tags,
-        "updated_at": FieldValue.serverTimestamp(),
-        'viewed_at': FieldValue.serverTimestamp(),
-        'viewed_times': 1,
+        "createdAt": FieldValue.serverTimestamp(),
+        "updatedAt": FieldValue.serverTimestamp(),
+        'viewedAt': FieldValue.serverTimestamp(),
+        'viewedTimes': 1,
         'uid': user.uid,
       })).then((ref) => ref.documentID);
     }
@@ -92,7 +93,7 @@ class RecipeService {
           "notes": notes,
           "tags": tags,
           "keywords": _buildKeywords(name, ingredients),
-          "updated_at": FieldValue.serverTimestamp()
+          "updatedAt": FieldValue.serverTimestamp()
         });
       });
     }).then((value) => id);
@@ -122,8 +123,8 @@ class RecipeService {
           throw "Recipe does not exist!";
         }
         transaction.update(recipeRef, {
-          "viewed_times": recipeDoc.data['viewed_times'] == null ? 1 : recipeDoc.data['viewed_times'] + 1,
-          "viewed_at": FieldValue.serverTimestamp()
+          "viewedTimes": recipeDoc.data['viewedTimes'] == null ? 1 : recipeDoc.data['viewedTimes'] + 1,
+          "viewedAt": FieldValue.serverTimestamp()
         });
       });
     })

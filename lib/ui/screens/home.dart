@@ -210,16 +210,20 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text("Name")
       ),
       PopupMenuItem(
-        value: "viewed_at:desc",
-        child: Text("Last Viewed")
+        value: "viewedAt:desc",
+        child: Text("Most Recently Viewed")
       ),
       PopupMenuItem(
-        value: "viewed_times:desc",
+        value: "viewedTimes:desc",
         child: Text("Most Viewed")
       ),
       PopupMenuItem(
-        value: "updated_at:desc",
-        child: Text("Last Updated")
+        value: "updatedAt:desc",
+        child: Text("Most Recently Updated")
+      ),
+      PopupMenuItem(
+        value: "createdAt:desc",
+        child: Text("Most Recently Added")
       ),
     ],
     initialValue: 'name:asc',
