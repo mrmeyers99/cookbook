@@ -5,24 +5,6 @@ import 'package:home_cooked/model/recipe.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  String mapInt(int i) {
-    return "a";
-  }
-
-  test("test", () {
-      var list = ["one", "three"];
-      var wordMap = {
-        1: "one",
-        2: "two",
-        3: "three",
-      };
-      wordMap.entries
-          .where((element) => element.value == "one")
-          .map((e) => e.key)
-          .first
-      print(list.map(mapInt));
-  });
-
   test('Section parser should parse list with no headings', () {
     var sections = Section.fromMarkup(["a", "b", "c", "d"]);
     expect(sections, containsAllInOrder(

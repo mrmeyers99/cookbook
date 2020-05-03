@@ -2,9 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_cooked/model/user.dart';
 import 'package:home_cooked/routing_constants.dart';
+import 'package:home_cooked/service/RecipeClippingService.dart';
 import 'package:home_cooked/service/RecipeService.dart';
 import 'package:home_cooked/service/UserService.dart';
 import 'package:home_cooked/ui/screens/edit_recipe.dart';
+import 'package:home_cooked/ui/widgets/input_alert_dialog.dart';
 import 'package:logging/logging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:home_cooked/model/recipe.dart';
@@ -28,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final UserService userService;
   final RecipeService recipeService;
+  final RecipeClippingService clippingService;
 
   Stream<QuerySnapshot> stream;
   String sortBy;
@@ -40,7 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _HomeScreenState():
       this.userService = locator.get<UserService>(),
-      this.recipeService = locator.get<RecipeService>();
+      this.recipeService = locator.get<RecipeService>(),
+      this.clippingService = locator.get<RecipeClippingService>();
 
   @override
   void initState() {
@@ -101,6 +105,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(context, MaterialPageRoute(
                     builder: (context) => EditRecipeScreen(Recipe.blank()),
                   ));
+                },
+              ),
+              ListTile(
+                title: Text('Clip Recipe'),
+                trailing: Icon(Icons.add_circle),
+                onTap: () {
+                  showDialog(context: context, builder: (context) =>
+                    InputAlertDialog("Enter a URL to clip", "url")
+                  ).then((url) async {
+                    if (url != null) {
+                      var recipe = await clippingService.clipRecipe(url);
+                      Navigator.pushReplacement(context,  MaterialPageRoute(
+                        builder: (context) => EditRecipeScreen(recipe),
+                      ));
+                    }
+                  });
                 },
               ),
               ListTile(

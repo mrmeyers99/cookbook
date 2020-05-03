@@ -49,7 +49,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
         this.sourceController = TextEditingController(text: recipe.source),
         this.notesController = TextEditingController(text: recipe.notes),
         this.tagsList = recipe.tags,
-        this.tagsController = TextEditingController(text: recipe.tags.join("\n")),
+        this.tagsController = TextEditingController(text: recipe.tags == null ? '' : recipe.tags.join("\n")),
         this._recipeService = locator.get<RecipeService>();
 
   // Create a global key that uniquely identifies the Form widget
@@ -204,6 +204,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
           name: nameController.text,
           ingredients: ingredientsController.text.split("\n"),
           instructions: instructionsController.text.split("\n"),
+          imageUrl: recipe.imageUrl,
           prepTime: prepTimeController.text,
           cookTime: cookTimeController.text,
           readyTime: readyTimeController.text,
@@ -212,7 +213,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
           tags: tagsController.text.split("\n"),
       )
       .then((result) {
-        if (recipe.id == "") {
+        if (recipe.id == null || recipe.id == "") {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecipeScreen(result)));
         } else {
           Navigator.pop(context);
