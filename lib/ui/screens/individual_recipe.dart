@@ -29,6 +29,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
 
   final String recipeId;
   final RecipeService _recipeService;
+  var regex = RegExp(r"https?://([^/]+).*");
 
   var stream;
 
@@ -238,10 +239,14 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
     if (source == null) {
       return Text('');
     } else if (source.startsWith("http")) {
-      return InkWell(child: Text(source), onTap: () => launch(source));
+      return InkWell(child: Text(extractHost(source)), onTap: () => launch(source));
     } else {
       return Text(source);
     }
+  }
+
+  String extractHost(String source) {
+    return regex.firstMatch(source).group(1);
   }
 }
 
