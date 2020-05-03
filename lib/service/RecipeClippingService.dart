@@ -21,7 +21,9 @@ class RecipeClippingService {
 
     List<String> instructions = List();
     res['analyzedInstructions'].forEach((section) {
-      instructions.add("*${section['name']}*");
+      if (section['name'] != null) {
+        instructions.add("*${section['name']}*");
+      }
       section['steps'].forEach((step) => instructions.add(step['step']));
     });
 
@@ -32,7 +34,7 @@ class RecipeClippingService {
         instructions: instructions,
         source: url,
         servings: res['servings'],
-        readyTime: "${res['readyInMinutes']} minutes",
+        readyTime: res['readyInMinutes'] == null ? '' : "${res['readyInMinutes']} minutes",
     );
   }
 }
