@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_cooked/model/user.dart';
@@ -11,6 +13,7 @@ import 'package:logging/logging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/ui/widgets/recipe_card_thumbnail.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import '../../locator.dart';
 import 'tags.dart';
@@ -40,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool clearTagsButtonVisible;
 
   User user;
+  StreamSubscription _intentDataStreamSubscription;
 
   _HomeScreenState():
       this.userService = locator.get<UserService>(),
@@ -59,6 +63,30 @@ class _HomeScreenState extends State<HomeScreen> {
           this.user = user;
           queryRecipes();
         });
+    });
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen((String value) {
+          log.info("Received $value.  Will clip this recipe");
+          clippingService.clipRecipe(value).then((recipe) =>
+              Navigator.push(context,  MaterialPageRoute(
+                builder: (context) => EditRecipeScreen(recipe),
+              ))
+          );
+        }, onError: (err) {
+          log.severe("getLinkStream error", err);
+        });
+
+    ReceiveSharingIntent.getInitialText().then((String value) {
+      if (value != null && value.startsWith("http")) {
+        log.info("Received $value.  Will clip this recipe.");
+        clippingService.clipRecipe(value).then((recipe) =>
+            Navigator.push(context, MaterialPageRoute(
+              builder: (context) => EditRecipeScreen(recipe),
+            ))
+        );
+      } else {
+        log.info("Received $value but do not recognize it as a URL");
+      }
     });
   }
 
@@ -262,6 +290,12 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _intentDataStreamSubscription.cancel();
+    super.dispose();
   }
 
 

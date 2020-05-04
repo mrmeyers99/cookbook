@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:home_cooked/locator.dart';
 import 'package:home_cooked/service/RecipeService.dart';
 import 'package:logging/logging.dart';
@@ -23,6 +24,11 @@ class RecipeScreen extends StatefulWidget {
     log.info("creating state for recipe $recipeId");
     return _RecipeScreenState(recipeId);
   }
+}
+
+enum BulletType {
+  bullets,
+  numbers,
 }
 
 class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
@@ -68,7 +74,7 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
     Wakelock.enable();
   }
 
-  ListView buildListView(List<Section> sections) {
+  ListView buildListView(List<Section> sections, BulletType bulletType) {
     return ListView.builder(
       physics: BouncingScrollPhysics(),
       scrollDirection: Axis.vertical,
@@ -82,11 +88,16 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
           children.add(ListTile(title: Text(sections[index].title, style: TextStyle(fontWeight: FontWeight.bold)), contentPadding: EdgeInsets.only(top: 0, left: 16, bottom: 0),));
           children.add(Divider(color: Colors.black12, height: 12));
         }
-        children.add(ListTile(title: Text(sections[index].list.join("\n")), contentPadding: EdgeInsets.only(left: 16, bottom: 16, right: 16, top: 8),));
-//        children.addAll(sections[index].list.map((i) => ListTile(title: Text(i), dense: true)));
-        return Card(child: Column(
-          children: children,
-        ));
+        children.addAll(sections[index].list.asMap().map<int, Widget>((i, line) => MapEntry(i, Container(
+            padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4.0, top: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(bulletType == BulletType.numbers ? "${i + 1}. " : "\u2022   "),
+                Expanded(child: Text(line))
+          ])))).values.toList());
+        return Card(child: Column(children: children));
       }
 
     );
@@ -224,8 +235,8 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
               body: TabBarView(
                 children: [
                   buildOverview(recipe),
-                  buildListView(Section.fromMarkup(recipe.ingredients)),
-                  buildListView(Section.fromMarkup(recipe.instructions)),
+                  buildListView(Section.fromMarkup(recipe.ingredients), BulletType.bullets),
+                  buildListView(Section.fromMarkup(recipe.instructions), BulletType.numbers),
                 ],
               ),
             ),
