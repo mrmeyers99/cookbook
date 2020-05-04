@@ -21,7 +21,7 @@ class RecipeClippingService {
 
     List<String> instructions = List();
     res['analyzedInstructions'].forEach((section) {
-      if (section['name'] != null) {
+      if (section['name'] != null && section['name'] != '') {
         instructions.add("*${section['name']}*");
       }
       section['steps'].forEach((step) => instructions.add(step['step']));
