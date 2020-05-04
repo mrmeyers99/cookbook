@@ -67,13 +67,4 @@ void main() {
     ]));
   });
 
-  test('Section parser should treat new lines in the middle as new sections', () {
-    var sections = Section.fromMarkup(["*a*", "b", "c", "", "d", "e", " ", "f", "g"]);
-    expect(sections, containsAllInOrder([
-      Section("a", ["b", "c"]),
-      Section(null, ["e", "e"]),
-      Section(null, ["f", "g"]),
-    ]));
-  });
-
 }
