@@ -162,9 +162,13 @@ class _HomeScreenState extends State<HomeScreen> {
           StreamBuilder(
             stream: stream,
             builder: (context, snapshot) => SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                 ///no.of items in the horizontal axis
-                crossAxisCount: 2,
+                //crossAxisCount: 2,
+                maxCrossAxisExtent: 300,
+                mainAxisSpacing: 2,
+                crossAxisSpacing: 2,
+                childAspectRatio: 0.95, // Needs to match the value on recipe_card_thumbnail.dart to make images look good.
               ),
 
               ///Lazy building of list

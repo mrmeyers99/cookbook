@@ -41,7 +41,11 @@ class RecipeThumbnail extends StatelessWidget {
             )
           ),
           alignment: Alignment.center,
-          child: Column(
+          child: AspectRatio(
+            aspectRatio: 0.95, //This needs to match the aspectRatio on home.dart
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, //title at top, image at bottom
               children: [
                   Center(
                     child: Padding(
@@ -56,9 +60,14 @@ class RecipeThumbnail extends StatelessWidget {
                       ),
                     ),
                   ),
-                // todo cache image and make this look better and handle resizing
-                recipe.imageUrl == null ? Container() : Image.network(recipe.imageUrl, height: 120),
+                // todo cache image
+                recipe.imageUrl == null ? Container() : Expanded(
+                  child: Container(
+                    child: Image.network(recipe.imageUrl, fit: BoxFit.cover)
+                  )
+                )
               ]
+            )
           )
         )
       )
