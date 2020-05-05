@@ -35,7 +35,6 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
   final TextEditingController readyTimeController;
   final TextEditingController sourceController;
   final TextEditingController notesController;
-  List tagsList;
   final TextEditingController tagsController;
   final RecipeService _recipeService;
 
@@ -48,7 +47,6 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
         this.readyTimeController = TextEditingController(text: recipe.readyTime),
         this.sourceController = TextEditingController(text: recipe.source),
         this.notesController = TextEditingController(text: recipe.notes),
-        this.tagsList = recipe.tags,
         this.tagsController = TextEditingController(text: recipe.tags == null ? '' : recipe.tags.join("\n")),
         this._recipeService = locator.get<RecipeService>();
 
@@ -173,21 +171,13 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                         ),
                       trailing: RaisedButton(
                         onPressed: () {
-                          // implement
+                          navigateToTagScreen(context);
                         },
                       child: Text('Choose'),
                       ),
                     ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    /*child: RaisedButton(
-                      onPressed: () {
-                        // Validate returns true if the form is valid, or false
-                        // otherwise.
-                        saveRecipe();
-                      },
-                      child: Text('Save'),
-                    ),*/
                   ),
                 ]
               )
@@ -223,12 +213,15 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     }
   }
 
-  /*Future navigateToTagScreen(context) async {
-    tagsList = await Navigator.push(context,
+  Future navigateToTagScreen(context) async {
+    var tagsListFuture = await Navigator.push(context,
       MaterialPageRoute(
-        builder: (context) => TagScreen(tagsList),
+        builder: (context) => TagScreen(tagsController.text.split('\n')),
         ));
-    }*/
+    if (tagsListFuture != null) { // will be null if the back arrow was pressed on tag screen
+      tagsController.text = tagsListFuture.join('\n');
+    }
+  }
 
 
 }

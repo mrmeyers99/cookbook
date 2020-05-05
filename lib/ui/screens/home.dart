@@ -274,11 +274,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   Future navigateToTagScreen(context) async {
-    filterBy = await Navigator.push(context,
+    var filterByFuture = await Navigator.push(context,
       MaterialPageRoute(
-        builder: (context) => TagScreen(user.uid, filterBy),
+        builder: (context) => TagScreen(filterBy),
         ));
-    if (filterBy != null) { // will be null if the back arrow was pressed on tag screen
+    if (filterByFuture != null) { // will be null if the back arrow was pressed on tag screen
+      filterBy = filterByFuture;
       setState(() {
         queryRecipes();
         if (listEquals(filterBy,[])) {
