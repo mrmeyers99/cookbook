@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:home_cooked/model/recipe.dart';
 import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 
 class RecipeService {
-  final log = Logger('RecipeService');
+  final _log = Logger('RecipeService');
+  final Uuid _uuid = Uuid();
   final CollectionReference _recipes;
   final Firestore _db;
 
@@ -28,7 +32,7 @@ class RecipeService {
     } else if (!listEquals(filterBy,[]) && !listEquals(filterBy,['all']) && filterBy != null) {
       query = query.where("tags", arrayContainsAny: filterBy);
     }
-    log.info("sorting by $sortBy, descending = $sortDesc");
+    _log.info("sorting by $sortBy, descending = $sortDesc");
     query = query.orderBy(sortBy, descending: sortDesc);
     if (maxResults > 0) {
       query = query.limit(maxResults);
@@ -85,6 +89,7 @@ class RecipeService {
         }
         transaction.update(recipeRef, {
           "name": name,
+          "imageUrl": imageUrl,
           "ingredients": ingredients,
           "instructions": instructions,
           "prepTime": prepTime,
@@ -130,7 +135,7 @@ class RecipeService {
       });
     })
     .then((value) => {})
-    .catchError((err) => log.warning("Error marking recipe as viewed", err));
+    .catchError((err) => _log.warning("Error marking recipe as viewed", err));
   }
 
 
@@ -147,7 +152,16 @@ class RecipeService {
       });
     })
     .then((value) => {})
-    .catchError((err) => log.warning("Error updating recipe tags", err));
+    .catchError((err) => _log.warning("Error updating recipe tags", err));
   }
 
+  Future<dynamic> uploadImage(File image) async {
+    StorageReference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('recipe_photos/${_uuid.v1()}');
+    StorageUploadTask uploadTask = storageReference.putFile(image);
+    await uploadTask.onComplete;
+    _log.info('File Uploaded');
+    return storageReference.getDownloadURL();
+  }
 }

@@ -1,5 +1,6 @@
 
 import 'dart:core';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +8,8 @@ import 'package:home_cooked/locator.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/service/RecipeService.dart';
 import 'package:home_cooked/ui/screens/individual_recipe.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
-
 import 'tags.dart';
 
 class EditRecipeScreen extends StatefulWidget {
@@ -25,29 +26,46 @@ class EditRecipeScreen extends StatefulWidget {
 }
 
 class _EditRecipeScreenState extends State<EditRecipeScreen> {
-  final log = Logger('_EditRecipeScreenState');
-  final Recipe recipe;
-  final TextEditingController nameController;
-  final TextEditingController ingredientsController;
-  final TextEditingController instructionsController;
-  final TextEditingController prepTimeController;
-  final TextEditingController cookTimeController;
-  final TextEditingController readyTimeController;
-  final TextEditingController sourceController;
-  final TextEditingController notesController;
-  final TextEditingController tagsController;
+  final _log = Logger('_EditRecipeScreenState');
+  final Recipe _recipe;
+  final TextEditingController _nameController;
+  final TextEditingController _ingredientsController;
+  final TextEditingController _instructionsController;
+  final TextEditingController _prepTimeController;
+  final TextEditingController _cookTimeController;
+  final TextEditingController _readyTimeController;
+  final TextEditingController _sourceController;
+  final TextEditingController _notesController;
+  final TextEditingController _tagsController;
   final RecipeService _recipeService;
+  File _image;
 
-  _EditRecipeScreenState(this.recipe):
-        this.nameController = TextEditingController(text: recipe.name),
-        this.ingredientsController = TextEditingController(text: recipe.ingredients.join("\n")),
-        this.instructionsController = TextEditingController(text: recipe.instructions.join("\n")),
-        this.prepTimeController = TextEditingController(text: recipe.prepTime),
-        this.cookTimeController = TextEditingController(text: recipe.cookTime),
-        this.readyTimeController = TextEditingController(text: recipe.readyTime),
-        this.sourceController = TextEditingController(text: recipe.source),
-        this.notesController = TextEditingController(text: recipe.notes),
-        this.tagsController = TextEditingController(text: recipe.tags == null ? '' : recipe.tags.join("\n")),
+  @override
+  void dispose() {
+    super.dispose();
+    if (_nameController != null) {
+      _nameController.dispose();
+      _ingredientsController.dispose();
+      _instructionsController.dispose();
+      _prepTimeController.dispose();
+      _cookTimeController.dispose();
+      _readyTimeController.dispose();
+      _sourceController.dispose();
+      _notesController.dispose();
+      _tagsController.dispose();
+    }
+  }
+
+  _EditRecipeScreenState(this._recipe):
+        this._nameController = TextEditingController(text: _recipe.name),
+        this._ingredientsController = TextEditingController(text: _recipe.ingredients.join("\n")),
+        this._instructionsController = TextEditingController(text: _recipe.instructions.join("\n")),
+        this._prepTimeController = TextEditingController(text: _recipe.prepTime),
+        this._cookTimeController = TextEditingController(text: _recipe.cookTime),
+        this._readyTimeController = TextEditingController(text: _recipe.readyTime),
+        this._sourceController = TextEditingController(text: _recipe.source),
+        this._notesController = TextEditingController(text: _recipe.notes),
+        this._tagsController = TextEditingController(text: _recipe.tags == null ? '' : _recipe.tags.join("\n")),
         this._recipeService = locator.get<RecipeService>();
 
   // Create a global key that uniquely identifies the Form widget
@@ -78,7 +96,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                   children: <Widget>[
                   ListTile(title:
                     TextFormField(
-                      controller: nameController,
+                      controller: _nameController,
                       decoration: InputDecoration(hintText: "Name"),
                       validator: (value) {
                         if (value.isEmpty) {
@@ -91,7 +109,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                     leading: Icon(Icons.fastfood),
                     title:
                       TextFormField(
-                        controller: ingredientsController,
+                        controller: _ingredientsController,
                         keyboardType: TextInputType.multiline,
                         textInputAction: TextInputAction.newline,
                         decoration: InputDecoration(hintText: "Ingredients"),
@@ -101,7 +119,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                       leading: Icon(Icons.format_list_numbered),
                       title:
                       TextFormField(
-                        controller: instructionsController,
+                        controller: _instructionsController,
                         keyboardType: TextInputType.multiline,
                         textInputAction: TextInputAction.newline,
                         decoration: InputDecoration(hintText: "Instructions"),
@@ -116,7 +134,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                     ),
                     title:
                       TextFormField(
-                        controller: prepTimeController,
+                        controller: _prepTimeController,
                         decoration: InputDecoration(hintText: "Prep Time"),
                   )),
                   ListTile(
@@ -128,7 +146,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                     ),
                     title:
                       TextFormField(
-                        controller: cookTimeController,
+                        controller: _cookTimeController,
                         decoration: InputDecoration(hintText: "Cook Time"),
                   )),
                   ListTile(
@@ -140,21 +158,21 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                     ),
                     title:
                       TextFormField(
-                        controller: readyTimeController,
+                        controller: _readyTimeController,
                         decoration: InputDecoration(hintText: "Ready Time"),
                   )),
                   ListTile(
                     leading: Icon(Icons.bookmark),
                       title:
                       TextFormField(
-                        controller: sourceController,
+                        controller: _sourceController,
                         decoration: InputDecoration(hintText: "Source"),
                   )),
                   ListTile(
                     leading: Icon(Icons.note),
                     title:
                       TextFormField(
-                        controller: notesController,
+                        controller: _notesController,
                         keyboardType: TextInputType.multiline,
                         textInputAction: TextInputAction.newline,
                         decoration: InputDecoration(hintText: "Notes"),
@@ -163,7 +181,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                     ListTile(
                       leading: Icon(Icons.loyalty),
                       title: TextFormField(
-                          controller: tagsController,
+                          controller: _tagsController,
                           keyboardType: TextInputType.multiline,
                           textInputAction: TextInputAction.newline,
                           decoration: InputDecoration(hintText: "Tags"),
@@ -173,7 +191,17 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                         onPressed: () {
                           navigateToTagScreen(context);
                         },
-                      child: Text('Choose'),
+                        child: Text('Choose'),
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.camera_alt),
+                      title: _image != null
+                          ? Image.asset(_image.path, height: 100)
+                          : Container(height: 100),
+                      trailing: RaisedButton(
+                        onPressed: chooseFile,
+                        child: Text('Choose'),
                       ),
                     ),
                   Padding(
@@ -185,41 +213,52 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
       );
   }
 
-
-
+  Future<void> chooseFile() {
+    return ImagePicker.pickImage(source: ImageSource.gallery).then((image) {
+      setState(() {
+        _image = image;
+      });
+    });
+  }
 
   void saveRecipe () {
     if (_formKey.currentState.validate()) {
-      _recipeService.updateRecipe(recipe.id,
-          name: nameController.text,
-          ingredients: ingredientsController.text.split("\n"),
-          instructions: instructionsController.text.split("\n"),
-          imageUrl: recipe.imageUrl,
-          prepTime: prepTimeController.text,
-          cookTime: cookTimeController.text,
-          readyTime: readyTimeController.text,
-          source: sourceController.text,
-          notes: notesController.text,
-          tags: tagsController.text.split("\n"),
+      var imageFuture = _image != null ? _recipeService.uploadImage(_image) : Future.value(_recipe.imageUrl);
+      imageFuture
+      .then((newUrl) {
+        _log.info("Updating URL to $newUrl");
+        return _recipeService.updateRecipe(_recipe.id,
+          name: _nameController.text,
+          ingredients: _ingredientsController.text.split("\n"),
+          instructions: _instructionsController.text.split("\n"),
+          imageUrl: newUrl,
+          prepTime: _prepTimeController.text,
+          cookTime: _cookTimeController.text,
+          readyTime: _readyTimeController.text,
+          source: _sourceController.text,
+          notes: _notesController.text,
+          tags: _tagsController.text.split("\n"),
+        );
+      }
       )
       .then((result) {
-        if (recipe.id == null || recipe.id == "") {
+        if (_recipe.id == null || _recipe.id == "") {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecipeScreen(result)));
         } else {
           Navigator.pop(context);
         }
       })
-      .catchError((err) => log.severe("Error saving recipe", err) /*todo: display error to user*/);
+      .catchError((e, stackTrace) => _log.severe("Error saving recipe", e, stackTrace) /*todo: display error to user*/);
     }
   }
 
   Future navigateToTagScreen(context) async {
     var tagsListFuture = await Navigator.push(context,
       MaterialPageRoute(
-        builder: (context) => TagScreen(tagsController.text.split('\n')),
+        builder: (context) => TagScreen(_tagsController.text.split('\n')),
         ));
     if (tagsListFuture != null) { // will be null if the back arrow was pressed on tag screen
-      tagsController.text = tagsListFuture.join('\n');
+      _tagsController.text = tagsListFuture.join('\n');
     }
   }
 
