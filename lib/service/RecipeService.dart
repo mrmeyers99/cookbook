@@ -36,7 +36,8 @@ class RecipeService {
     return query.snapshots();
   }
 
-  Future<List<String>> getTagList(String uid) async {
+  Future<List<String>> getTagList() async {
+    String uid = (await FirebaseAuth.instance.currentUser()).uid;
     QuerySnapshot query = await _recipes.where("uid", isEqualTo: uid).getDocuments();
     var tagSet = Set<String>();
     query.documents

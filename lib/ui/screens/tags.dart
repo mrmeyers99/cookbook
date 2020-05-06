@@ -5,10 +5,9 @@ import 'package:home_cooked/service/UserService.dart';
 import '../../locator.dart';
 
 class TagScreen extends StatefulWidget {
-  final uid;
   final List preexistingFilters;
 
-  TagScreen(this.uid, this.preexistingFilters);
+  TagScreen(this.preexistingFilters);
 
   @override
   State<StatefulWidget> createState() {
@@ -42,7 +41,6 @@ class _TagScreenState extends State<TagScreen> {
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.check),
-              // todo: make check only appear if selection has changed
               onPressed: () {
                 Navigator.pop(context, selectedTags);
               },
@@ -87,8 +85,30 @@ class _TagScreenState extends State<TagScreen> {
               }
             },
           ),
-        ));
+        ),
+        floatingActionButton: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton.extended(
+              onPressed: () {
+                // implement
+              },
+              label: Text('All'),
+              icon: Icon(Icons.check),
+            ),
+            SizedBox(height: 8),
+            FloatingActionButton.extended(
+              onPressed: () {
+                // implement
+              },
+              label: Text('All'),
+              icon: Icon(Icons.clear),
+            ),
+          ]
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
   }
 
-  Future<List<String>> getFutureTags() => recipeService.getTagList(widget.uid);
+  Future<List<String>> getFutureTags() => recipeService.getTagList();
 }
