@@ -19,6 +19,9 @@ class _TagScreenState extends State<TagScreen> {
   final UserService userService;
   final RecipeService recipeService;
   final List selectedTags = [];
+  List<String> allRecipeTags;
+  bool fabVisible = false; 
+  Future<List<String>> tagListFuture;
 
   _TagScreenState()
       : this.userService = locator.get<UserService>(),
@@ -27,6 +30,7 @@ class _TagScreenState extends State<TagScreen> {
   @override
   void initState() {
     super.initState();
+    tagListFuture = _getTagList();
     if (widget.preexistingFilters != null) {
       widget.preexistingFilters.forEach(selectedTags.add);
     }
@@ -51,7 +55,7 @@ class _TagScreenState extends State<TagScreen> {
           width: double.infinity,
           height: double.infinity,
           child: FutureBuilder(
-            future: getFutureTags(),
+            future: tagListFuture,
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.hasData) {
                 return Center(
@@ -86,29 +90,43 @@ class _TagScreenState extends State<TagScreen> {
             },
           ),
         ),
-        floatingActionButton: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FloatingActionButton.extended(
-              onPressed: () {
-                // implement
-              },
-              label: Text('All'),
-              icon: Icon(Icons.check),
-            ),
-            SizedBox(height: 8),
-            FloatingActionButton.extended(
-              onPressed: () {
-                // implement
-              },
-              label: Text('All'),
-              icon: Icon(Icons.clear),
-            ),
-          ]
+        floatingActionButton: Visibility(
+          visible: fabVisible,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FloatingActionButton.extended(
+                heroTag: 'fabSelectAllTags',
+                onPressed: () {
+                  // implement
+                },
+                label: Text('All'),
+                icon: Icon(Icons.check),
+              ),
+              SizedBox(height: 8),
+              FloatingActionButton.extended(
+                heroTag: 'fabSelectNoneTags',
+                onPressed: () {
+                  // implement
+                },
+                label: Text('All'),
+                icon: Icon(Icons.clear),
+              ),
+            ]
+          ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
-  Future<List<String>> getFutureTags() => recipeService.getTagList();
+
+
+  Future<List<String>> _getTagList() async {
+    allRecipeTags = await recipeService.getTagList();
+    //print(allRecipeTags);
+    fabVisible = true;
+    //print(fabVisible);
+    return allRecipeTags;
+  } 
+
 }
