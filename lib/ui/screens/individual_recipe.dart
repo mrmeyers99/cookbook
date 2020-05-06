@@ -84,8 +84,18 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
       itemBuilder: (BuildContext ctxt, int index) {
         var children = List<Widget>();
         if (sections[index].title != null) {
-          //todo: figure out how to make there be less space between the section header
-          children.add(ListTile(title: Text(sections[index].title, style: TextStyle(fontWeight: FontWeight.bold)), contentPadding: EdgeInsets.only(top: 0, left: 16, bottom: 0),));
+          children.add(
+              Container(
+                  padding: EdgeInsets.only(top: 8, left: 16, bottom: 0),
+                  child: Row(
+                      children: [
+                        Expanded(child:
+                            Text(sections[index].title,
+                                style: TextStyle(fontWeight: FontWeight.bold)))
+                      ]
+                  )
+              )
+          );
           children.add(Divider(color: Colors.black12, height: 12));
         }
         children.addAll(sections[index].list.asMap().map<int, Widget>((i, line) => MapEntry(i, Container(
