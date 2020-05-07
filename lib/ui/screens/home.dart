@@ -137,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 title: Text('Clip Recipe'),
-                trailing: Icon(Icons.add_circle),
+                trailing: Icon(Icons.attach_file),
                 onTap: () {
                   showDialog(context: context, builder: (context) =>
                     InputAlertDialog("Enter a URL to clip", "url")

@@ -12,7 +12,7 @@ class Recipe {
   final String prepTime;
   final String cookTime;
   final String readyTime;
-  final int servings;
+  final String servings;
   final String source;
   final String notes;
 

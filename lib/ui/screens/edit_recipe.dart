@@ -35,6 +35,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
   final TextEditingController _prepTimeController;
   final TextEditingController _cookTimeController;
   final TextEditingController _readyTimeController;
+  final TextEditingController _servingsController;
   final TextEditingController _sourceController;
   final TextEditingController _notesController;
   final TextEditingController _tagsController;
@@ -51,6 +52,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
       _prepTimeController.dispose();
       _cookTimeController.dispose();
       _readyTimeController.dispose();
+      _servingsController.dispose();
       _sourceController.dispose();
       _notesController.dispose();
       _tagsController.dispose();
@@ -65,6 +67,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
         this._cookTimeController = TextEditingController(text: _recipe.cookTime),
         this._readyTimeController = TextEditingController(text: _recipe.readyTime),
         this._sourceController = TextEditingController(text: _recipe.source),
+        this._servingsController = TextEditingController(text: _recipe.servings),
         this._notesController = TextEditingController(text: _recipe.notes),
         this._tagsController = TextEditingController(text: _recipe.tags == null ? '' : _recipe.tags.join("\n")),
         this._recipeService = locator.get<RecipeService>();
@@ -163,6 +166,13 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                         decoration: InputDecoration(hintText: "Ready Time"),
                   )),
                   ListTile(
+                    leading: Icon(Icons.short_text),
+                      title:
+                      TextFormField(
+                        controller: _servingsController,
+                        decoration: InputDecoration(hintText: "Servings"),
+                  )),
+                  ListTile(
                     leading: Icon(Icons.bookmark),
                       title:
                       TextFormField(
@@ -248,6 +258,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
           prepTime: _prepTimeController.text,
           cookTime: _cookTimeController.text,
           readyTime: _readyTimeController.text,
+          servings: _servingsController.text,
           source: _sourceController.text,
           notes: _notesController.text,
           tags: _tagsController.text.split("\n"),
