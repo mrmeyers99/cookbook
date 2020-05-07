@@ -127,15 +127,15 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
           children: [
             Column(children: [
               Text("Prep Time:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              Text(recipe.prepTime == null ? '' : recipe.prepTime),
+              Text(recipe.prepTime == null ? '' : "${recipe.prepTime} minutes"),
             ]),
             Column(children: [
               Text("Cook Time:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              Text(recipe.cookTime == null ? '' : recipe.cookTime)
+              Text(recipe.cookTime == null ? '' : "${recipe.cookTime} minutes")
             ]),
             Column(children: [
               Text("Ready Time:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              Text(recipe.readyTime == null ? '' : recipe.readyTime)
+              Text(recipe.readyTime == null ? '' : "${recipe.readyTime} minutes")
             ]),
           ]
         ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:home_cooked/model/recipe.dart';
+import 'package:home_cooked/util/string_util.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as json;
 
@@ -33,8 +34,8 @@ class RecipeClippingService {
         ingredients: ingredients,
         instructions: instructions,
         source: url,
-        servings: res['servings'],
-        readyTime: res['readyInMinutes'] == null ? '' : "${res['readyInMinutes']} minutes",
+        servings: res['servings'] == null ? null : res['servings'].toString(),
+        readyTime: res['readyInMinutes'],
     );
   }
 }

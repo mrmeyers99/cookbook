@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:home_cooked/locator.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/service/RecipeService.dart';
@@ -63,9 +64,9 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
         this._nameController = TextEditingController(text: _recipe.name),
         this._ingredientsController = TextEditingController(text: _recipe.ingredients.join("\n")),
         this._instructionsController = TextEditingController(text: _recipe.instructions.join("\n")),
-        this._prepTimeController = TextEditingController(text: _recipe.prepTime),
-        this._cookTimeController = TextEditingController(text: _recipe.cookTime),
-        this._readyTimeController = TextEditingController(text: _recipe.readyTime),
+        this._prepTimeController = TextEditingController(text: _recipe.prepTime == null ? '' : "${_recipe.prepTime}"),
+        this._cookTimeController = TextEditingController(text: _recipe.cookTime == null ? '' : "${_recipe.cookTime}"),
+        this._readyTimeController = TextEditingController(text: _recipe.readyTime == null ? '' : "${_recipe.readyTime}"),
         this._sourceController = TextEditingController(text: _recipe.source),
         this._servingsController = TextEditingController(text: _recipe.servings),
         this._notesController = TextEditingController(text: _recipe.notes),
@@ -138,6 +139,10 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                     ),
                     title:
                       TextFormField(
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ], // Only numbers can be entered
                         controller: _prepTimeController,
                         decoration: InputDecoration(hintText: "Prep Time"),
                   )),
@@ -150,6 +155,10 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                     ),
                     title:
                       TextFormField(
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ], // Only numbers can be entered
                         controller: _cookTimeController,
                         decoration: InputDecoration(hintText: "Cook Time"),
                   )),
@@ -163,6 +172,10 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                     title:
                       TextFormField(
                         controller: _readyTimeController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ], // Only numbers can be entered
                         decoration: InputDecoration(hintText: "Ready Time"),
                   )),
                   ListTile(
@@ -255,9 +268,9 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
           ingredients: _ingredientsController.text.split("\n"),
           instructions: _instructionsController.text.split("\n"),
           imageUrl: newUrl,
-          prepTime: _prepTimeController.text,
-          cookTime: _cookTimeController.text,
-          readyTime: _readyTimeController.text,
+          prepTime: StringUtil.isNullOrEmpty(_prepTimeController.text) ? null : int.parse(_prepTimeController.text),
+          cookTime: StringUtil.isNullOrEmpty(_cookTimeController.text) ? null : int.parse(_cookTimeController.text),
+          readyTime: StringUtil.isNullOrEmpty(_readyTimeController.text) == null ? null : int.parse(_readyTimeController.text),
           servings: _servingsController.text,
           source: _sourceController.text,
           notes: _notesController.text,

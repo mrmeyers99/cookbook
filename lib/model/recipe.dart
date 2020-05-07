@@ -9,9 +9,9 @@ class Recipe {
   final List<String> tags;
   final List<String> keywords;
 
-  final String prepTime;
-  final String cookTime;
-  final String readyTime;
+  final int prepTime;
+  final int cookTime;
+  final int readyTime;
   final String servings;
   final String source;
   final String notes;

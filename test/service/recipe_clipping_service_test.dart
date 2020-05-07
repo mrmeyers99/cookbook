@@ -10,9 +10,9 @@ void main() {
     var recipe = await recipeService.clipRecipe("https://www.bonappetit.com/recipe/bas-best-chicken-parm");
     expect(recipe.name, equals("BA's Best Chicken Parm"));
     expect(recipe.source, equals("https://www.bonappetit.com/recipe/bas-best-chicken-parm"));
-    expect(recipe.servings, equals(8));
+    expect(recipe.servings, equals('8'));
     expect(recipe.imageUrl, equals("https://spoonacular.com/recipeImages/1443263-556x370.jpg"));
-    expect(recipe.readyTime, equals("45 minutes"));
+    expect(recipe.readyTime, equals(45));
   });
 
 }
