@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
@@ -12,10 +13,12 @@ class RecipeService {
   final Uuid _uuid = Uuid();
   final CollectionReference _recipes;
   final Firestore _db;
+  final StorageReference _storageReference;
 
   RecipeService():
         this._recipes = Firestore.instance.collection("recipes"),
-        this._db = Firestore.instance;
+        this._db = Firestore.instance,
+        this._storageReference = FirebaseStorage.instance.ref().child("recipe_photos/");
 
   Stream<QuerySnapshot> getRecipes(String uid, {
     String sortBy = 'name',
@@ -155,11 +158,34 @@ class RecipeService {
     .catchError((err) => _log.warning("Error updating recipe tags", err));
   }
 
-  Future<dynamic> uploadImage(File image) async {
-    StorageReference storageReference = FirebaseStorage.instance
-        .ref()
-        .child('recipe_photos/${_uuid.v1()}');
-    StorageUploadTask uploadTask = storageReference.putFile(image);
+  Future<StorageMetadata> _getImageMetdata() async {
+    var user = await FirebaseAuth.instance.currentUser();
+    return StorageMetadata(customMetadata: {
+      'uid': user.uid
+    });
+  }
+
+  Future<dynamic> uploadImageFromDisk(File image) async {
+    var storageReference = _storageReference.child("/"+_uuid.v1());
+    var metadata = await _getImageMetdata();
+    StorageUploadTask uploadTask = storageReference.putFile(image, metadata);
+    await uploadTask.onComplete;
+    _log.info('File Uploaded');
+    return storageReference.getDownloadURL();
+  }
+
+  Future<dynamic> uploadImageFromUrl(String url) async {
+    var response = await http.get(url).then((response) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return response.bodyBytes;
+      } else {
+        throw "Unable to download image";
+      }
+    });
+
+    var metadata = await _getImageMetdata();
+    StorageReference storageReference = _storageReference.child(_uuid.v1());
+    StorageUploadTask uploadTask = storageReference.putData(response, metadata);
     await uploadTask.onComplete;
     _log.info('File Uploaded');
     return storageReference.getDownloadURL();

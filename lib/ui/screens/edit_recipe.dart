@@ -8,6 +8,7 @@ import 'package:home_cooked/locator.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/service/RecipeService.dart';
 import 'package:home_cooked/ui/screens/individual_recipe.dart';
+import 'package:home_cooked/util/string_util.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logging/logging.dart';
 import 'tags.dart';
@@ -198,7 +199,9 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                       leading: Icon(Icons.camera_alt),
                       title: _image != null
                           ? Image.asset(_image.path, height: 100)
-                          : Container(height: 100),
+                          : _recipe.imageUrl != null
+                            ? Image.network(_recipe.imageUrl, height: 100)
+                            : Container(height: 100),
                       trailing: RaisedButton(
                         onPressed: chooseFile,
                         child: Text('Choose'),
@@ -221,10 +224,20 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     });
   }
 
+  Future<dynamic> _uploadRecipeImage() {
+    if (_image != null) {
+      return _recipeService.uploadImageFromDisk(_image);
+    } else if (StringUtil.isNullOrEmpty(_recipe.id) && _recipe.imageUrl != null
+        || (StringUtil.notNullOrEmpty(_recipe.imageUrl) && !_recipe.imageUrl.contains("firebasestorage"))) {
+      return _recipeService.uploadImageFromUrl(_recipe.imageUrl);
+    } else {
+      return Future.value(_recipe.imageUrl);
+    }
+  }
+
   void saveRecipe () {
     if (_formKey.currentState.validate()) {
-      var imageFuture = _image != null ? _recipeService.uploadImage(_image) : Future.value(_recipe.imageUrl);
-      imageFuture
+      _uploadRecipeImage()
       .then((newUrl) {
         _log.info("Updating URL to $newUrl");
         return _recipeService.updateRecipe(_recipe.id,
