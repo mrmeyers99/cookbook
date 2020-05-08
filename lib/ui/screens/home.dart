@@ -91,12 +91,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void queryRecipes() {
-    stream = recipeService.getRecipes(user.uid, sortBy: sortBy, sortDesc: sortDesc, filterBy: filterBy); //todo: implement this again: filterBy: filterBy
+    stream = recipeService.getRecipes(user.uid, sortBy: sortBy, sortDesc: sortDesc, filterBy: filterBy);
   }
 
   @override
   Widget build(BuildContext context) {
     WidgetsFlutterBinding.ensureInitialized();
+    log.info("Building home screen");
 
     if (stream == null) {
       log.info("Recipes have not been loaded yet");

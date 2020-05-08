@@ -179,7 +179,12 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
                         decoration: InputDecoration(hintText: "Ready Time"),
                   )),
                   ListTile(
-                    leading: Icon(Icons.short_text),
+                      leading: Column(
+                          children: [
+                            Icon(Icons.short_text),
+                            Text('Servings')
+                          ]
+                      ),
                       title:
                       TextFormField(
                         controller: _servingsController,
@@ -270,7 +275,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
           imageUrl: newUrl,
           prepTime: StringUtil.isNullOrEmpty(_prepTimeController.text) ? null : int.parse(_prepTimeController.text),
           cookTime: StringUtil.isNullOrEmpty(_cookTimeController.text) ? null : int.parse(_cookTimeController.text),
-          readyTime: StringUtil.isNullOrEmpty(_readyTimeController.text) == null ? null : int.parse(_readyTimeController.text),
+          readyTime: StringUtil.isNullOrEmpty(_readyTimeController.text) ? null : int.parse(_readyTimeController.text),
           servings: _servingsController.text,
           source: _sourceController.text,
           notes: _notesController.text,
@@ -279,7 +284,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
       }
       )
       .then((result) {
-        if (_recipe.id == null || _recipe.id == "") {
+        if (StringUtil.isBlank(_recipe.id)) {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecipeScreen(result)));
         } else {
           Navigator.pop(context);

@@ -24,8 +24,10 @@ class RecipeThumbnail extends StatelessWidget {
       },
       onLongPress: () {
         if (recipe.tags.contains('queue')) {
+          log.info("${recipe.id} removed from queue");
           recipe.tags.remove('queue');
         } else {
+          log.info("${recipe.id} added from queue");
           recipe.tags.add('queue');
         }
         _recipeService.updateTags(recipe.id, recipe.tags);
@@ -53,7 +55,7 @@ class RecipeThumbnail extends StatelessWidget {
                       child:Text(
                         recipe.name,
                         style: TextStyle(
-                          fontWeight: FontWeight.w700, 
+                          fontWeight: FontWeight.w700,
                           fontSize: 15.0
                         ),
                         textAlign: TextAlign.center,

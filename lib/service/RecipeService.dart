@@ -156,7 +156,7 @@ class RecipeService {
         });
       });
     })
-    .then((value) => {})
+    .then((value) => {_log.info("Recipe $id updated")})
     .catchError((err) => _log.warning("Error updating recipe tags", err));
   }
 
