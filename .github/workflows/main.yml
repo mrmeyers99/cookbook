@@ -14,9 +14,8 @@ jobs:
         flutter-version: '1.17.0'
     - run: flutter pub get
     - run: flutter test
+    - name: Decode google-services.json
+      env:
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+      run: echo $FIREBASE_CONFIG > app/google-services.json
     - run: flutter build apk --debug --split-per-abi
-    - name: Create a Release APK
-      uses: ncipollo/release-action@v1
-      with:
-        artifacts: "build/app/outputs/apk/debug/*.apk"
-        token: ${{ secrets.TOKEN }}
