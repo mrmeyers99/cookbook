@@ -43,12 +43,16 @@ class _TagScreenState extends State<TagScreen> {
               ? Container(
                 width: double.infinity,
                 height: double.infinity,
-                child: Center(
-                  child: ListView.builder(
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        var tag = snapshot.data[index];
-                        return FilterChip(
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(height: 15),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      //runSpacing: 0,
+                      children: snapshot.data.map((tag) => Padding(
+                        padding: const EdgeInsets.only(left: 6, right: 6),
+                        child: FilterChip(
+                          avatar: selectedTags.contains(tag) ? CircleAvatar(backgroundColor: Colors.black) : CircleAvatar(backgroundColor: Colors.white),
                           label: Text(tag == '' ? 'Untagged' : tag),
                           onSelected: (bool value) {
                             setState(() {
@@ -65,8 +69,13 @@ class _TagScreenState extends State<TagScreen> {
                             color: Colors.white,
                           ),
                           backgroundColor: Colors.green,
-                        );
-                      })))
+                        )
+                      )
+                      ).toList().cast<Widget>(),
+                    )
+                  ]
+                )
+              )
               : Center(child: CircularProgressIndicator());
           return Scaffold(
               appBar: AppBar(
