@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:home_cooked/model/user.dart';
 import 'package:home_cooked/routing_constants.dart';
-import 'package:home_cooked/service/UserService.dart';
+import 'package:home_cooked/service/user_service.dart';
 
 import '../../locator.dart';
 

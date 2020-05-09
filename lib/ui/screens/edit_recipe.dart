@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:home_cooked/locator.dart';
 import 'package:home_cooked/model/recipe.dart';
-import 'package:home_cooked/service/RecipeService.dart';
+import 'package:home_cooked/service/recipe_service.dart';
 import 'package:home_cooked/ui/screens/individual_recipe.dart';
 import 'package:home_cooked/util/string_util.dart';
 import 'package:image_picker/image_picker.dart';

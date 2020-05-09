@@ -5,7 +5,7 @@ import 'package:home_cooked/util/string_util.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as json;
 
-class RecipeClippingService {
+class SpoonacularService {
 
   final String apiKey = 'db878a56ae6a46739cdb8695eed51af3';
   final String apiUrl = 'https://api.spoonacular.com/recipes/extract';

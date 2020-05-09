@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:home_cooked/locator.dart';
-import 'package:home_cooked/service/RecipeService.dart';
+import 'package:home_cooked/service/recipe_service.dart';
 import 'package:logging/logging.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:wakelock/wakelock.dart';
