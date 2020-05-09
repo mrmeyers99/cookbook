@@ -4,9 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_cooked/model/user.dart';
 import 'package:home_cooked/routing_constants.dart';
-import 'package:home_cooked/service/RecipeClippingService.dart';
-import 'package:home_cooked/service/RecipeService.dart';
-import 'package:home_cooked/service/UserService.dart';
+import 'package:home_cooked/service/recipe_service.dart';
+import 'package:home_cooked/service/user_service.dart';
+import 'package:home_cooked/service/spoonacular_service.dart';
 import 'package:home_cooked/ui/screens/edit_recipe.dart';
 import 'package:home_cooked/ui/widgets/input_alert_dialog.dart';
 import 'package:logging/logging.dart';
@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final UserService userService;
   final RecipeService recipeService;
-  final RecipeClippingService clippingService;
+  final SpoonacularService clippingService;
 
   Stream<QuerySnapshot> stream;
   String sortBy;
@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   _HomeScreenState():
       this.userService = locator.get<UserService>(),
       this.recipeService = locator.get<RecipeService>(),
-      this.clippingService = locator.get<RecipeClippingService>();
+      this.clippingService = locator.get<SpoonacularService>();
 
   @override
   void initState() {

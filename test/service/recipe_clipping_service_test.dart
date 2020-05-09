@@ -1,13 +1,11 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:home_cooked/model/recipe.dart';
-import 'package:home_cooked/service/RecipeClippingService.dart';
+import 'package:home_cooked/service/spoonacular_service.dart';
 
 void main() {
-  var recipeService = RecipeClippingService();
+  var spoonacular = SpoonacularService();
 
   test('Recipe clipping service should clip recipes', () async {
-    var recipe = await recipeService.clipRecipe("https://www.bonappetit.com/recipe/bas-best-chicken-parm");
+    var recipe = await spoonacular.clipRecipe("https://www.bonappetit.com/recipe/bas-best-chicken-parm");
     expect(recipe.name, equals("BA's Best Chicken Parm"));
     expect(recipe.source, equals("https://www.bonappetit.com/recipe/bas-best-chicken-parm"));
     expect(recipe.servings, equals('8'));

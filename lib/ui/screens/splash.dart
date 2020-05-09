@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:home_cooked/locator.dart';
 import 'package:home_cooked/routing_constants.dart';
-import 'package:home_cooked/service/UserService.dart';
+import 'package:home_cooked/service/user_service.dart';
 import 'package:logging/logging.dart';
 
 import '../../main.dart';

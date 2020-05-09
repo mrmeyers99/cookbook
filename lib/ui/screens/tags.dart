@@ -1,7 +1,7 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
-import 'package:home_cooked/service/RecipeService.dart';
-import 'package:home_cooked/service/UserService.dart';
+import 'package:home_cooked/service/recipe_service.dart';
+import 'package:home_cooked/service/user_service.dart';
 import '../../locator.dart';
 
 class TagScreen extends StatefulWidget {

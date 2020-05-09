@@ -3,7 +3,7 @@ import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/ui/screens/individual_recipe.dart';
 import 'package:logging/logging.dart';
 import 'package:home_cooked/locator.dart';
-import 'package:home_cooked/service/RecipeService.dart';
+import 'package:home_cooked/service/recipe_service.dart';
 
 class RecipeThumbnail extends StatelessWidget {
   final Recipe recipe;
