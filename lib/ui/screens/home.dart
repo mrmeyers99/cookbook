@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/ui/widgets/recipe_card_thumbnail.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:simple_gravatar/simple_gravatar.dart';
 
 import '../../locator.dart';
 import 'tags.dart';
@@ -59,10 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
     clearTagsButtonVisible = false;
     userService.getCurrentUser().then((user) {
         log.info("User ${user.email} is logged in");
-        setState(() {
-          this.user = user;
-          queryRecipes();
-        });
+        if (mounted) {
+          setState(() {
+            this.user = user;
+            queryRecipes();
+          });
+        }
     });
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getTextStream().listen((String value) {
@@ -118,13 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   accountName: Text(user.fullName),
                   accountEmail: Text(user.email),
                   currentAccountPicture: CircleAvatar(
-                    backgroundColor: Theme.of(context).platform == TargetPlatform.iOS
-                        ? Colors.blue
-                        : Colors.white,
-                    child: Text(
-                      user.initials,
-                      style: TextStyle(fontSize: 40.0),
-                    ),
+                    backgroundImage: _getGravatar(user.email),
                   ),
               ),
               ListTile(
@@ -300,6 +297,15 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  ImageProvider _getGravatar(String email) {
+    var gravatar = Gravatar(email);
+    return NetworkImage(gravatar.imageUrl(
+      size: 100,
+      defaultImage: GravatarImage.retro,
+      rating: GravatarRating.pg,
+      fileExtension: true,
+    ));
+  }
 
 }
 
