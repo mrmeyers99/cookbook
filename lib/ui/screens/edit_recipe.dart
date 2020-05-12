@@ -297,7 +297,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
   Future navigateToTagScreen(context) async {
     var tagsListFuture = await Navigator.push(context,
       MaterialPageRoute(
-        builder: (context) => TagScreen(_tagsController.text.split('\n')),
+        builder: (context) => TagScreen(_tagsController.text.split('\n'), recipeID: _recipe.id,),
         ));
     if (tagsListFuture != null) { // will be null if the back arrow was pressed on tag screen
       _tagsController.text = tagsListFuture.join('\n');

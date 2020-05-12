@@ -6,8 +6,9 @@ import '../../locator.dart';
 
 class TagScreen extends StatefulWidget {
   final List preexistingFilters;
+  final String recipeID;
 
-  TagScreen(this.preexistingFilters);
+  TagScreen(this.preexistingFilters, {this.recipeID = ''});
 
   @override
   State<StatefulWidget> createState() {
@@ -82,6 +83,19 @@ class _TagScreenState extends State<TagScreen> {
                 backgroundColor: Colors.blue,
                 title: Text('Choose Tags'),
                 actions: <Widget>[
+                  Visibility(
+                    visible: widget.recipeID == '' ? false : true,
+                    child: IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () async {
+                        final String newTag = await _asyncInputDialog(context);
+                        setState(() {
+                          selectedTags.add(newTag);
+                          recipeService.updateTags(widget.recipeID, (selectedTags.toList()));
+                        });
+                      }
+                    )
+                  ),
                   IconButton(
                     icon: Icon(Icons.check),
                     onPressed: () {
@@ -124,4 +138,46 @@ class _TagScreenState extends State<TagScreen> {
         }
     );
   }
+
+
+  Future<String> _asyncInputDialog(BuildContext context) async {
+    String newTag = '';
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false, // dialog is dismissible with a tap on the barrier
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter new tag name'),
+          content: new Row(
+            children: <Widget>[
+              new Expanded(
+                  child: new TextField(
+                autofocus: true,
+                decoration: new InputDecoration(
+                    labelText: 'New tag name', hintText: 'eg. Midnight snacks'),
+                onChanged: (value) {
+                  newTag = value;
+                },
+              ))
+            ],
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(null);
+              },
+            ),
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop(newTag);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }
