@@ -18,8 +18,9 @@ jobs:
         token: ${{secrets.TOKEN}}
     - name: Print new build number
       run: echo "Build number is $BUILD_NUMBER"
-    - run: flutter --build-number=$BUILD_NUMBER pub get
-    - run: flutter --build-number=$BUILD_NUMBER test
+
+    - run: flutter pub get
+    - run: flutter test
 
     - name: Decode google-services.json
       env:
@@ -27,7 +28,7 @@ jobs:
       run: echo $FIREBASE_CONFIG > android/app/google-services.json
 
     - name: Build release APKs
-      run: flutter --build-number=$BUILD_NUMBER build apk --release
+      run: flutter --build-number=$BUILD_NUMBER build apk --release --build-number=$BUILD_NUMBER
 
     - name: upload artifact to Firebase App Distribution
       uses: wzieba/Firebase-Distribution-Github-Action@v1.2.1
