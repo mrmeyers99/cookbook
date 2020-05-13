@@ -31,7 +31,7 @@ jobs:
       run: echo $FIREBASE_CONFIG > android/app/google-services.json
 
     - name: Build release APKs
-      run: flutter --build-number=$BUILD_NUMBER build apk --release --build-number=$BUILD_NUMBER
+      run: flutter build apk --release --build-number=$BUILD_NUMBER
 
     - name: upload artifact to Firebase App Distribution
       uses: wzieba/Firebase-Distribution-Github-Action@v1.2.1
