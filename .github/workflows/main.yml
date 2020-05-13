@@ -1,4 +1,7 @@
-on: push
+on:
+  push:
+    paths-ignore:
+      - 'build-number-*'
 name: Test, Build and Release apk
 jobs:
   build:
