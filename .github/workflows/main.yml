@@ -1,5 +1,7 @@
 on:
   push:
+    branches:
+      - '**'
     tags-ignore:
       - 'build-number-*'
 name: Test, Build and Release apk
