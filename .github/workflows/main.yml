@@ -23,7 +23,9 @@ jobs:
       run: echo "Build number is $BUILD_NUMBER"
 
     - run: flutter pub get
-    - run: flutter test
+
+    - name: Run tests
+      run: flutter test
 
     - name: Decode google-services.json
       env:
