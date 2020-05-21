@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:home_cooked/model/parsed_ingredient.dart';
@@ -20,7 +19,6 @@ void main() {
   final recipeService = RecipeService();
   final recipes = MockCollection();
 
-  @Skip('currently failing.  need to figure this out');
   test('Recipe service should scale recipes', () async {
     when(mockSpoonacular.parseIngredients(any))
         .thenAnswer((_) async =>
@@ -34,6 +32,6 @@ void main() {
     when(mockFireStore.collection(any)).thenReturn(recipes);
 
     await recipeService.scaleRecipe("gx7wCQkbEFhWirKvELm5", 2.0);
-  });
+  }, skip: 'currently failing.  need to figure this out');
 
 }
