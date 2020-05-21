@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:home_cooked/model/parsed_ingredient.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/util/string_util.dart';
 import 'package:http/http.dart' as http;
@@ -37,5 +38,19 @@ class SpoonacularService {
         servings: res['servings'] == null ? null : res['servings'].toString(),
         readyTime: res['readyInMinutes'],
     );
+  }
+
+  Future<List<ParsedIngredient>> parseIngredients(List<String> ingredients) async {
+    var url = Uri.https('api.spoonacular.com', '/recipes/parseIngredients', {
+      'apiKey': apiKey,
+    });
+    var body = {
+      'ingredientList': ingredients.join("\n"),
+    };
+    var response = await http.post(url, body: body);
+    var res = json.jsonDecode(Utf8Codec().decode(response.bodyBytes));
+    var parsedIngredients = List<ParsedIngredient>();
+    res.forEach((ingredient) => parsedIngredients.add(ParsedIngredient.fromMap(ingredient)));
+    return parsedIngredients;
   }
 }

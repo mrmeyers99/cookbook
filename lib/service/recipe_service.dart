@@ -1,9 +1,16 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:home_cooked/locator.dart';
+import 'package:home_cooked/model/parsed_ingredient.dart';
+import 'package:home_cooked/service/spoonacular_service.dart';
+import 'package:home_cooked/util/fraction_util.dart';
+import 'package:home_cooked/util/string_util.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
@@ -14,25 +21,29 @@ class RecipeService {
   final CollectionReference _recipes;
   final Firestore _db;
   final StorageReference _storageReference;
+  final SpoonacularService _spoonacularService;
 
-  RecipeService():
-        this._recipes = Firestore.instance.collection("recipes"),
-        this._db = Firestore.instance,
-        this._storageReference = FirebaseStorage.instance.ref().child("recipe_photos/");
+  RecipeService()
+      : this._recipes = locator.get<Firestore>().collection("recipes"),
+        this._db = locator.get<Firestore>(),
+        this._storageReference =
+            FirebaseStorage.instance.ref().child("recipe_photos/"),
+        this._spoonacularService = locator.get<SpoonacularService>();
 
-  Stream<QuerySnapshot> getRecipes(String uid, {
-    String sortBy = 'name',
-    bool sortDesc = false,
-    List filterBy = const [],
-    String keywords = '',
-    int maxResults = 0
-    }
-    ) {
+  Stream<QuerySnapshot> getRecipes(String uid,
+      {String sortBy = 'name',
+      bool sortDesc = false,
+      List filterBy = const [],
+      String keywords = '',
+      int maxResults = 0}) {
     Query query = _recipes.where("uid", isEqualTo: uid);
 
     if (keywords != '' && keywords != null) {
-      query = query.where("keywords", arrayContainsAny: keywords.toLowerCase().split(" "));
-    } else if (!listEquals(filterBy,[]) && !listEquals(filterBy,['all']) && filterBy != null) {
+      query = query.where("keywords",
+          arrayContainsAny: keywords.toLowerCase().split(" "));
+    } else if (!listEquals(filterBy, []) &&
+        !listEquals(filterBy, ['all']) &&
+        filterBy != null) {
       query = query.where("tags", arrayContainsAny: filterBy);
     }
     _log.info("sorting by $sortBy, descending = $sortDesc");
@@ -45,7 +56,8 @@ class RecipeService {
 
   Future<List<String>> getTagList() async {
     String uid = (await FirebaseAuth.instance.currentUser()).uid;
-    QuerySnapshot query = await _recipes.where("uid", isEqualTo: uid).getDocuments();
+    QuerySnapshot query =
+        await _recipes.where("uid", isEqualTo: uid).getDocuments();
     var tagSet = Set<String>();
     query.documents
         .where((doc) => doc.data['tags'] != null)
@@ -63,38 +75,82 @@ class RecipeService {
     return _recipes.document(id).delete();
   }
 
-  Future<String> updateRecipe(String id, {name: String, ingredients: String, instructions: String, imageUrl: String, prepTime: int, cookTime: int, readyTime: int, servings: String, source: String, notes: String, tags: String}) {
-    if (id == null || id == "") {
-      return FirebaseAuth.instance.currentUser().then((user) => _recipes.add({
-        "name": name,
-        "ingredients": ingredients,
-        "instructions": instructions,
-        "imageUrl": imageUrl,
-        "prepTime": prepTime,
-        "cookTime": cookTime,
-        "readyTime": readyTime,
-        "source": source,
-        "notes": notes,
-        "servings": servings,
-        "keywords": _buildKeywords(name, ingredients),
-        "tags": tags,
-        "createdAt": FieldValue.serverTimestamp(),
-        "updatedAt": FieldValue.serverTimestamp(),
-        'viewedAt': FieldValue.serverTimestamp(),
-        'viewedTimes': 1,
-        'uid': user.uid,
-      })).then((ref) => ref.documentID);
-    }
+  Future<void> scaleRecipe(String id, double scale) {
     var recipeRef = _recipes.document(id);
     return _db.runTransaction((transaction) {
-      return transaction.get(recipeRef).then((recipeDoc) {
+      return transaction.get(recipeRef).then((recipeDoc) async {
         if (!recipeDoc.exists) {
           throw "Recipe does not exist!";
         }
-        transaction.update(recipeRef, {
+
+        Map<String, dynamic> updatedData = {
+          'scale': scale,
+        };
+        if (recipeDoc.data['ingredients'] != null && scale != 1.0) {
+          updatedData['scaledIngredients'] = await _scaleIngredients(scale, List.from(recipeDoc.data['ingredients']));
+        }
+        transaction.update(recipeRef, updatedData);
+      });
+    }).then((value) => id);
+  }
+
+  Future<String> updateRecipe(String id,
+      {name: String,
+      ingredients: String,
+      instructions: String,
+      imageUrl: String,
+      prepTime: int,
+      cookTime: int,
+      readyTime: int,
+      servings: String,
+      source: String,
+      notes: String,
+      tags: String}) {
+
+    var ingredientsChecksum = _calculateChecksum(ingredients.join("\n"));
+
+    if (StringUtil.isNullOrEmpty(id)) {
+      return FirebaseAuth.instance
+          .currentUser()
+          .then((user) => _recipes.add({
+                "name": name,
+                "ingredients": ingredients,
+                "scale": 1.0,
+                "ingredientsChecksum": ingredientsChecksum,
+                "instructions": instructions,
+                "imageUrl": imageUrl,
+                "prepTime": prepTime,
+                "cookTime": cookTime,
+                "readyTime": readyTime,
+                "source": source,
+                "notes": notes,
+                "servings": servings,
+                "keywords": _buildKeywords(name, ingredients),
+                "tags": tags,
+                "createdAt": FieldValue.serverTimestamp(),
+                "updatedAt": FieldValue.serverTimestamp(),
+                'viewedAt': FieldValue.serverTimestamp(),
+                'viewedTimes': 1,
+                'uid': user.uid,
+              }))
+          .then((ref) => ref.documentID);
+    }
+    var recipeRef = _recipes.document(id);
+    return _db.runTransaction((transaction) {
+      return transaction.get(recipeRef).then((recipeDoc) async {
+        if (!recipeDoc.exists) {
+          throw "Recipe does not exist!";
+        }
+
+        String currentChecksum = recipeDoc.data['ingredientsChecksum'];
+        String currentName = recipeDoc.data['name'];
+        double currentScale = recipeDoc.data['scale'];
+
+        var updatedData = {
           "name": name,
           "imageUrl": imageUrl,
           "ingredients": ingredients,
+          "ingredientsChecksum": ingredientsChecksum,
           "instructions": instructions,
           "prepTime": prepTime,
           "cookTime": cookTime,
@@ -103,9 +159,18 @@ class RecipeService {
           "source": source,
           "notes": notes,
           "tags": tags,
-          "keywords": _buildKeywords(name, ingredients),
           "updatedAt": FieldValue.serverTimestamp()
-        });
+        };
+
+        if (ingredientsChecksum != currentChecksum || name != currentName) {
+          updatedData['keywords'] = _buildKeywords(name, ingredients);
+        }
+
+        if (currentScale != null && currentScale != 1.0 && ingredientsChecksum != currentChecksum) {
+          updatedData['scaledIngredients'] = await _scaleIngredients(currentScale, ingredients);
+        }
+
+        transaction.update(recipeRef, updatedData);
       });
     }).then((value) => id);
   }
@@ -114,12 +179,14 @@ class RecipeService {
     var wordList = name.split(" ");
     //todo since we add ingredient parsing, we should probably ignore quantities and units
     //todo ignore punctuation in words?  smores vs s'mores?
-    ingredients.where((s) => !s.startsWith("//")).forEach((s) => wordList.addAll(s.split(" ")));
+    ingredients
+        .where((s) => !s.startsWith("//"))
+        .forEach((s) => wordList.addAll(s.split(" ")));
     var wordSet = wordList.map((s) => s.toLowerCase()).toSet();
 
     var subWordSet = Set<String>();
     wordSet.forEach((word) {
-      for(var i = 2; i <= word.length; i++) {
+      for (var i = 2; i <= word.length; i++) {
         subWordSet.add(word.substring(0, i));
       }
     });
@@ -128,47 +195,47 @@ class RecipeService {
 
   Future<void> markViewed(String id) {
     var recipeRef = _recipes.document(id);
-    return _db.runTransaction((transaction) {
-      return transaction.get(recipeRef).then((recipeDoc) {
-        if (!recipeDoc.exists) {
-          throw "Recipe does not exist!";
-        }
-        transaction.update(recipeRef, {
-          "viewedTimes": recipeDoc.data['viewedTimes'] == null ? 1 : recipeDoc.data['viewedTimes'] + 1,
-          "viewedAt": FieldValue.serverTimestamp()
-        });
-      });
-    })
-    .then((value) => {})
-    .catchError((err) => _log.warning("Error marking recipe as viewed", err));
+    return _db
+        .runTransaction((transaction) {
+          return transaction.get(recipeRef).then((recipeDoc) {
+            if (!recipeDoc.exists) {
+              throw "Recipe does not exist!";
+            }
+            transaction.update(recipeRef, {
+              "viewedTimes": recipeDoc.data['viewedTimes'] == null
+                  ? 1
+                  : recipeDoc.data['viewedTimes'] + 1,
+              "viewedAt": FieldValue.serverTimestamp()
+            });
+          });
+        })
+        .then((value) => {})
+        .catchError(
+            (err) => _log.warning("Error marking recipe as viewed", err));
   }
-
 
   Future<void> updateTags(String id, List newTagList) {
     var recipeRef = _recipes.document(id);
-    return _db.runTransaction((transaction) {
-      return transaction.get(recipeRef).then((recipeDoc) {
-        if (!recipeDoc.exists) {
-          throw "Recipe does not exist!";
-        }
-        transaction.update(recipeRef, {
-          "tags": newTagList
-        });
-      });
-    })
-    .then((value) => {_log.info("Recipe $id updated")})
-    .catchError((err) => _log.warning("Error updating recipe tags", err));
+    return _db
+        .runTransaction((transaction) {
+          return transaction.get(recipeRef).then((recipeDoc) {
+            if (!recipeDoc.exists) {
+              throw "Recipe does not exist!";
+            }
+            transaction.update(recipeRef, {"tags": newTagList});
+          });
+        })
+        .then((value) => {_log.info("Recipe $id updated")})
+        .catchError((err) => _log.warning("Error updating recipe tags", err));
   }
 
   Future<StorageMetadata> _getImageMetdata() async {
     var user = await FirebaseAuth.instance.currentUser();
-    return StorageMetadata(customMetadata: {
-      'uid': user.uid
-    });
+    return StorageMetadata(customMetadata: {'uid': user.uid});
   }
 
   Future<dynamic> uploadImageFromDisk(File image) async {
-    var storageReference = _storageReference.child("/"+_uuid.v1());
+    var storageReference = _storageReference.child("/" + _uuid.v1());
     var metadata = await _getImageMetdata();
     StorageUploadTask uploadTask = storageReference.putFile(image, metadata);
     await uploadTask.onComplete;
@@ -192,4 +259,35 @@ class RecipeService {
     _log.info('File Uploaded');
     return storageReference.getDownloadURL();
   }
+
+  static String _calculateChecksum(String ingredients) {
+    var digest = sha1.convert(utf8.encode(ingredients));
+    return digest.toString();
+  }
+
+  static bool _isHeading(String string) => string.startsWith('*') && string.endsWith('*');
+
+  static bool _isComment(String string) => string.startsWith('//');
+
+  Future<List<String>> _scaleIngredients(double scale, List<String> ingredients) async {
+    _log.info("scaling ingredients");
+    List<ParsedIngredient> parsedIngredients = await _spoonacularService.parseIngredients(ingredients);
+    List<String> scaledIngredients = List();
+    parsedIngredients.asMap().entries
+      .forEach((entry) {
+        var newValue = "";
+        var originalName = entry.value.originalName;
+        if (_isHeading(originalName) || _isComment(originalName)) {
+          newValue = originalName;
+        } else if (entry.value.id == null) {
+          newValue = "{color:0xFFC62828}$originalName{color}";
+        } else {
+          _log.info(entry.value);
+          newValue = "${FractionUtil.toFraction(entry.value.amount * scale)} ${entry.value.unit} ${entry.value.originalName}";
+        }
+        scaledIngredients.add(newValue);
+    });
+    return scaledIngredients;
+  }
+
 }
