@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:home_cooked/locator.dart';
@@ -44,7 +45,8 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
 
   var stream;
 
-  _RecipeScreenState(this.recipeId) : this._recipeService = locator.get<RecipeService>();
+  _RecipeScreenState(this.recipeId) :
+        this._recipeService = locator.get<RecipeService>();
 
   @override
   void initState() {
@@ -139,10 +141,9 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
   Widget buildOverview(Recipe recipe) {
     return Card(child: ListView(
       children: [
-        recipe.imageUrl != null ? Image.network(
-          recipe.imageUrl, //todo use cache
-          fit: BoxFit.cover,
-        ) : Container(),
+        recipe.imageUrl != null ? CachedNetworkImage(
+            imageUrl: recipe.imageUrl,
+            fit: BoxFit.cover) : Container(),
         Divider(),
         Row(
           mainAxisSize: MainAxisSize.max,

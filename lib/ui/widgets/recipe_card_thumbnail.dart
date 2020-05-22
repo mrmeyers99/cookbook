@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/ui/screens/individual_recipe.dart';
@@ -62,10 +63,9 @@ class RecipeThumbnail extends StatelessWidget {
                       ),
                     ),
                   ),
-                // todo cache image
                 recipe.imageUrl == null ? Container() : Expanded(
                   child: Container(
-                    child: Image.network(recipe.imageUrl, fit: BoxFit.cover)
+                    child: CachedNetworkImage(imageUrl: recipe.imageUrl, fit: BoxFit.cover)
                   )
                 )
               ]
