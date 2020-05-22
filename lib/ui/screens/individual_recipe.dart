@@ -12,8 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../main.dart';
 import 'edit_recipe.dart';
 
-// mostly from https://medium.com/@diegoveloper/flutter-collapsing-toolbar-sliver-app-bar-14b858e87abe
-
 class RecipeScreen extends StatefulWidget {
 
   final log = Logger('RecipeScreen');
@@ -81,8 +79,9 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
     Wakelock.enable();
   }
 
-  ListView buildListView(List<Section> sections, BulletType bulletType) {
+  ListView buildListView(String key, List<Section> sections, BulletType bulletType) {
     return ListView.builder(
+      key: PageStorageKey(key),
       physics: BouncingScrollPhysics(),
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -134,16 +133,6 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
               TextSpan(text: match.group(4)),
             ],
           ));
-//      return RichText(
-//        text: TextSpan(
-//          text: 'Hello ',
-//          style: DefaultTextStyle.of(context).style,
-//          children: <TextSpan>[
-//            TextSpan(text: 'bold', style: TextStyle(fontWeight: FontWeight.bold)),
-//            TextSpan(text: ' world!'),
-//          ],
-//        ),
-//      );
     }
   }
 
@@ -307,61 +296,11 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
             body: TabBarView(
               children: <Widget>[
                 buildOverview(recipe),
-                buildListView(addScaledInfo(recipe), BulletType.bullets),
-                buildListView(Section.fromMarkup(recipe.instructions), BulletType.numbers),
+                buildListView("${recipe.id}-ingredients", addScaledInfo(recipe), BulletType.bullets),
+                buildListView("${recipe.id}-instructions", Section.fromMarkup(recipe.instructions), BulletType.numbers),
               ],
             ),
-//            child: NestedScrollView(
-//              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-//                return <Widget>[
-//                  SliverAppBar(
-//                    floating: false,
-//                    pinned: true,
-//                    actions: <Widget>[
-//                      IconButton(icon: Icon(Icons.edit), onPressed: () {
-//                        Navigator.push(
-//                            context,
-//                            MaterialPageRoute(
-//                              builder: (context) => EditRecipeScreen(recipe),
-//                            ));
-//                      }),
-//                      IconButton(icon: Icon(Icons.delete), onPressed: () {
-
-//                      }),
-//                    ],
-//                    flexibleSpace: FlexibleSpaceBar(
-//                        centerTitle: true,
-//                        title: Text(recipe.name,
-//                            style: TextStyle(
-//                              color: Colors.white,
-//                              fontSize: 16.0,
-//                            )),
-//                    ),
-//                  ),
-//                  SliverPersistentHeader(
-//                    delegate: _SliverAppBarDelegate(
-//
-//                    ),
-//                    pinned: true,
-//                  ),
-//                ];
-//              },
-//              body: TabBarView(
-//                children: [
-//                ],
-//              ),
-//            ),
-          ),
-//          endDrawer: Drawer(
-//            child: Container(
-//              child: ListView(
-//                padding: EdgeInsets.all(10.0),
-//                children: [
-//                  ListTile(title: Text("hi")),
-//                ]
-//              ),
-//            ),
-//          ),
+          )
         );
       }
     );
