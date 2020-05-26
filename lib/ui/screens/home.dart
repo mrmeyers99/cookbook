@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:home_cooked/model/user.dart';
 import 'package:home_cooked/routing_constants.dart';
 import 'package:home_cooked/service/recipe_service.dart';
@@ -15,6 +16,7 @@ import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/ui/widgets/recipe_card_thumbnail.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:simple_gravatar/simple_gravatar.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../locator.dart';
 import 'tags.dart';
@@ -42,6 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
   List filterBy;
   //var tagButtonColor = Colors.white;
   bool clearTagsButtonVisible;
+  bool _jsonLoadingPath = false;
+  String _jsonFileName;
+  String _jsonFilePath;
+  Map<String, String> _jsonFilePaths;
 
   User user;
   StreamSubscription _intentDataStreamSubscription;
@@ -135,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ListTile(
                 title: Text('Clip Recipe'),
-                trailing: Icon(Icons.attach_file),
+                trailing: Icon(Icons.content_cut), //was attach_file, could use public
                 onTap: () {
                   showDialog(context: context, builder: (context) =>
                     InputAlertDialog("Enter a URL to clip", "url")
@@ -150,8 +156,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
               ListTile(
+                title: Text('Import JSON'),
+                trailing: Icon(Icons.file_download),
+                onTap: () {
+                  //todo: implement () => _openFileExplorer();
+                },
+              ),
+              ListTile(
                 title: Text('Logout'),
-                trailing: Icon(Icons.exit_to_app),
+                trailing: Icon(Icons.perm_identity), //could use people, lock, perm_identity, exit_to_app
                 onTap: () {
                   userService.signOut().then((result) =>
                       Navigator.pushReplacementNamed(context, LoginViewRoute));
@@ -289,6 +302,26 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       });
     }
+  }
+
+//https://github.com/miguelpruivo/flutter_file_picker/wiki/Setup#android
+//https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/lib/src/file_picker_demo.dart
+  void _openFileExplorer() async {
+    setState(() => _jsonLoadingPath = true);
+    try{
+      _jsonFilePaths = null;
+      _jsonFilePath = await FilePicker.getFilePath(
+        type: FileType.any,
+        //allowedExtensions: 
+      );
+    } on PlatformException catch (e) {
+      print("Unsupported operation" + e.toString());
+    }
+    if (!mounted) return;
+    setState(() {
+      _jsonLoadingPath = false;
+      _jsonFileName = _jsonFilePath != null ? _jsonFilePath.split('/').last : _jsonFilePaths != null ? _jsonFilePaths.keys.toString() : '...';
+    });
   }
 
   @override
