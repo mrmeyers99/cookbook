@@ -1,7 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:home_cooked/locator.dart';
 import 'package:home_cooked/service/recipe_service.dart';
+import 'package:home_cooked/ui/widgets/confirm_dialog.dart';
+import 'package:home_cooked/ui/widgets/input_alert_dialog.dart';
 import 'package:logging/logging.dart';
 import 'package:home_cooked/model/recipe.dart';
 import 'package:wakelock/wakelock.dart';
@@ -9,8 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../main.dart';
 import 'edit_recipe.dart';
-
-// mostly from https://medium.com/@diegoveloper/flutter-collapsing-toolbar-sliver-app-bar-14b858e87abe
 
 class RecipeScreen extends StatefulWidget {
 
@@ -31,15 +32,21 @@ enum BulletType {
   numbers,
 }
 
+enum RecipeMenuEntry {
+  Edit, Delete, Scale
+}
+
 class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
 
   final String recipeId;
   final RecipeService _recipeService;
-  var regex = RegExp(r"https?://([^/]+).*");
+  final _httpRegex = RegExp(r"https?://([^/]+).*");
+  final _colorRegex = RegExp(r"(.*){color:([A-Za-z0-9]+)}(.*){color}(.*)");
 
   var stream;
 
-  _RecipeScreenState(this.recipeId) : this._recipeService = locator.get<RecipeService>();
+  _RecipeScreenState(this.recipeId) :
+        this._recipeService = locator.get<RecipeService>();
 
   @override
   void initState() {
@@ -74,8 +81,9 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
     Wakelock.enable();
   }
 
-  ListView buildListView(List<Section> sections, BulletType bulletType) {
+  ListView buildListView(String key, List<Section> sections, BulletType bulletType) {
     return ListView.builder(
+      key: PageStorageKey(key),
       physics: BouncingScrollPhysics(),
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -105,21 +113,37 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(bulletType == BulletType.numbers ? "${i + 1}. " : "\u2022   "),
-                Expanded(child: Text(line))
+                Expanded(child: _buildItemText(ctxt, line)),
           ])))).values.toList());
         return Card(child: Column(children: children));
       }
-
     );
+  }
+
+  Widget _buildItemText(BuildContext context, String string) {
+    var match = _colorRegex.firstMatch(string);
+    if (match == null) {
+      return Text(string);
+    } else {
+      this.widget.log.info('1: ${match.group(1)},2: ${match.group(2)},3: ${match.group(3)},4: ${match.group(4)}');
+      return RichText(
+          text: TextSpan(
+            text: match.group(1),
+            style: DefaultTextStyle.of(context).style,
+            children: [
+              TextSpan(text: match.group(3), style: TextStyle(color: Color(int.parse(match.group(2))))),
+              TextSpan(text: match.group(4)),
+            ],
+          ));
+    }
   }
 
   Widget buildOverview(Recipe recipe) {
     return Card(child: ListView(
       children: [
-        recipe.imageUrl != null ? Image.network(
-          recipe.imageUrl, //todo use cache
-          fit: BoxFit.cover,
-        ) : Container(),
+        recipe.imageUrl != null ? CachedNetworkImage(
+            imageUrl: recipe.imageUrl,
+            fit: BoxFit.cover) : Container(),
         Divider(),
         Row(
           mainAxisSize: MainAxisSize.max,
@@ -159,9 +183,44 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
     );
   }
 
+  void _onEditPressed(Recipe recipe) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EditRecipeScreen(recipe),
+        ));
+  }
+
+  void _onDeletePressed(Recipe recipe) {
+    showDialog(
+      context: context,
+      builder: (BuildContext alertContext) {
+        return ConfirmDialog("Are you sure you want to delete recipe ${recipe.name}?", "Delete");
+      },
+    ).then((shouldDelete) {
+      if (shouldDelete) {
+        _recipeService.deleteRecipe(recipe.id);
+        Navigator.pop(context);
+      }
+    });
+  }
+
+  void _onScalePressed(Recipe recipe) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return InputAlertDialog("Enter scale factor", "1.0", TextInputType.number);
+        }
+    ).then((scaleFactor) {
+      if (scaleFactor != null) {
+        this.widget.log.info('Scaling recipe ${recipe.id} to $scaleFactor');
+        _recipeService.scaleRecipe(recipe.id, double.parse(scaleFactor));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-
     return StreamBuilder(
       stream: stream,
       builder: (context, snapshot) {
@@ -171,91 +230,78 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
 
         var recipe = Recipe.fromMap(snapshot.data.data, recipeId);
 
-        return Scaffold(
-          body: DefaultTabController(
-            length: 3,
-            child: NestedScrollView(
-              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                return <Widget>[
-                  SliverAppBar(
-                    floating: false,
-                    pinned: true,
-                    actions: <Widget>[
-                      IconButton(icon: Icon(Icons.edit), onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditRecipeScreen(recipe),
-                            ));
-                      }),
-                      IconButton(icon: Icon(Icons.delete), onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext alertContext) {
-                            // return object of type Dialog
-                            return AlertDialog(
-                              title: new Text("Are you sure?"),
-                              content: new Text("Are you sure you want to delete recipe ${recipe.name}?"),
-                              actions: <Widget>[
-                                // usually buttons at the bottom of the dialog
-                                new FlatButton(
-                                  child: new Text("Cancel"),
-                                  onPressed: () {
-                                    Navigator.of(alertContext).pop(false);
-                                  },
-                                ),
-                                new FlatButton(
-                                  child: new Text("Delete"),
-                                  onPressed: () {
-                                    Navigator.of(alertContext).pop(true);
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        ).then((shouldDelete) {
-                          if (shouldDelete) {
-                            _recipeService.deleteRecipe(recipe.id);
-                            Navigator.pop(context);
-                          }
-                        });
-                      }),
-                    ],
-                    flexibleSpace: FlexibleSpaceBar(
-                        centerTitle: true,
-                        title: Text(recipe.name,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
-                            )),
-                    ),
-                  ),
-                  SliverPersistentHeader(
-                    delegate: _SliverAppBarDelegate(
-                      TabBar(
-                        labelColor: Colors.black87,
-                        unselectedLabelColor: Colors.grey,
-                        tabs: [
-                          Tab(icon: Icon(Icons.local_see), text: "Overview"),
-                          //Other relevant ones are restaurant, restaurant_menu
-                          Tab(icon: Icon(Icons.fastfood), text: "Ingredients"),
-                          Tab(icon: Icon(Icons.format_list_numbered), text: "Instructions"),
-                        ],
+        return DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(recipe.name),
+              actions: <Widget>[
+                PopupMenuButton(
+                  onSelected: (result) {
+                    switch (result) {
+                      case RecipeMenuEntry.Edit:
+                        _onEditPressed(recipe);
+                        break;
+                      case RecipeMenuEntry.Delete:
+                        _onDeletePressed(recipe);
+                        break;
+                      case RecipeMenuEntry.Scale:
+                        _onScalePressed(recipe);
+                        break;
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<RecipeMenuEntry>>[
+                    PopupMenuItem<RecipeMenuEntry>(
+                      value: RecipeMenuEntry.Scale,
+                      child: Row(
+                          children: <Widget>[
+                            Icon(Icons.compare_arrows, color: Colors.black54),
+                            Padding(padding: EdgeInsets.only(right: 8)),
+                            Text('Scale'),
+                          ]
                       ),
                     ),
-                    pinned: true,
-                  ),
-                ];
-              },
-              body: TabBarView(
-                children: [
-                  buildOverview(recipe),
-                  buildListView(Section.fromMarkup(recipe.ingredients), BulletType.bullets),
-                  buildListView(Section.fromMarkup(recipe.instructions), BulletType.numbers),
+                    PopupMenuItem<RecipeMenuEntry>(
+                      value: RecipeMenuEntry.Edit,
+                      child: Row(
+                          children: <Widget>[
+                            Icon(Icons.edit, color: Colors.black54),
+                            Padding(padding: EdgeInsets.only(right: 8)),
+                            Text('Edit'),
+                          ]
+                      ),
+                    ),
+                    PopupMenuItem<RecipeMenuEntry>(
+                      value: RecipeMenuEntry.Delete,
+                      child: Row(
+                          children: <Widget>[
+                            Icon(Icons.delete, color: Colors.black54),
+                            Padding(padding: EdgeInsets.only(right: 8)),
+                            Text('Delete'),
+                          ]
+                      ),
+                    ),
+                  ],
+                )
+              ],
+              bottom: TabBar(
+                labelColor: Colors.black87,
+                unselectedLabelColor: Colors.white70,
+                tabs: [
+                  Tab(icon: Icon(Icons.local_see), text: "Overview"),
+                  Tab(icon: Icon(Icons.fastfood), text: "Ingredients"),
+                  Tab(icon: Icon(Icons.format_list_numbered), text: "Instructions"),
                 ],
               ),
             ),
-          ),
+            body: TabBarView(
+              children: <Widget>[
+                buildOverview(recipe),
+                buildListView("${recipe.id}-ingredients", addScaledInfo(recipe), BulletType.bullets),
+                buildListView("${recipe.id}-instructions", Section.fromMarkup(recipe.instructions), BulletType.numbers),
+              ],
+            ),
+          )
         );
       }
     );
@@ -272,31 +318,17 @@ class _RecipeScreenState extends State<RecipeScreen> with RouteAware {
   }
 
   String extractHost(String source) {
-    return regex.firstMatch(source).group(1);
-  }
-}
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new Container(
-      color: Colors.white,
-      child: _tabBar,
-    );
+    return _httpRegex.firstMatch(source).group(1);
   }
 
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
+  List<Section> addScaledInfo(Recipe recipe) {
+    if (recipe.scale != 1.0 && recipe.scaledIngredients.length > 0) {
+      var sections = List<Section>();
+      sections.add(Section("Scale", ["Scaled to ${recipe.scale}X.  Ingredients in {color:0xFFC62828}red{color} could not be scaled."]));
+      sections.addAll(Section.fromMarkup(recipe.scaledIngredients));
+      return sections;
+    } else {
+      return Section.fromMarkup(recipe.ingredients);
+    }
   }
 }

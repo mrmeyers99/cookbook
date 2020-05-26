@@ -144,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 trailing: Icon(Icons.content_cut), //was attach_file, could use public
                 onTap: () {
                   showDialog(context: context, builder: (context) =>
-                    InputAlertDialog("Enter a URL to clip", "url")
+                    InputAlertDialog("Enter a URL to clip", "url", TextInputType.url)
                   ).then((url) async {
                     if (url != null) {
                       var recipe = await clippingService.clipRecipe(url);

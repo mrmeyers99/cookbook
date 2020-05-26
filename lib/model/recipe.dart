@@ -9,6 +9,9 @@ class Recipe {
   final List<String> tags;
   final List<String> keywords;
 
+  final double scale;
+  final List<String> scaledIngredients;
+
   final int prepTime;
   final int cookTime;
   final int readyTime;
@@ -16,7 +19,7 @@ class Recipe {
   final String source;
   final String notes;
 
-  Recipe({this.id, this.name, this.imageUrl, this.ingredients, this.instructions, this.tags, this.keywords, this.prepTime, this.cookTime, this.readyTime, this.servings, this.source, this.notes});
+  Recipe({this.id, this.name, this.imageUrl, this.ingredients, this.instructions, this.tags, this.keywords, this.scale, this.scaledIngredients, this.prepTime, this.cookTime, this.readyTime, this.servings, this.source, this.notes});
 
   Recipe.blank() : this(id: "", ingredients: List(), instructions: List());
 
@@ -28,6 +31,8 @@ class Recipe {
     instructions: _buildList(data, 'instructions'),
     tags: _buildList(data, 'tags'),
     keywords: _buildList(data, 'keywords'),
+    scale: data['scale'] == null ? 1 : data['scale'],
+    scaledIngredients: data['scaledIngredients'] == null ? _buildList(data, 'igredients') : _buildList(data, 'scaledIngredients'),
     prepTime: data['prepTime'],
     cookTime: data['cookTime'],
     readyTime: data['readyTime'],
