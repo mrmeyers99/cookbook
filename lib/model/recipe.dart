@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
 class Recipe {
@@ -41,7 +43,19 @@ class Recipe {
     notes: data['notes'],
   );
 
+  static List<Recipe> fromJsonList(String jsonContent) {
+    final parsed = json.decode(jsonContent).cast<Map<String, dynamic>>();
+    return parsed.map<Recipe>((json) => Recipe.fromMap(json, null)).toList();
+  }
+
   static List<String> _buildList(map, key) => map[key] == null ? List() : List.from(map[key]);
+
+  @override
+  String toString() {
+    return 'Recipe{id: $id, name: $name, imageUrl: $imageUrl, ingredients: $ingredients, instructions: $instructions, tags: $tags, keywords: $keywords, scale: $scale, scaledIngredients: $scaledIngredients, prepTime: $prepTime, cookTime: $cookTime, readyTime: $readyTime, servings: $servings, source: $source, notes: $notes}';
+  }
+
+
 }
 
 class Section {

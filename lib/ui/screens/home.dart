@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_document_picker/flutter_document_picker.dart';
 import 'package:home_cooked/model/user.dart';
 import 'package:home_cooked/routing_constants.dart';
 import 'package:home_cooked/service/recipe_service.dart';
@@ -10,6 +12,7 @@ import 'package:home_cooked/service/user_service.dart';
 import 'package:home_cooked/service/spoonacular_service.dart';
 import 'package:home_cooked/ui/screens/edit_recipe.dart';
 import 'package:home_cooked/ui/widgets/input_alert_dialog.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:logging/logging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:home_cooked/model/recipe.dart';
@@ -45,12 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
   //var tagButtonColor = Colors.white;
   bool clearTagsButtonVisible;
   bool _jsonLoadingPath = false;
-  String _jsonFileName;
-  String _jsonFilePath;
-  Map<String, String> _jsonFilePaths;
+  File _jsonFile;
 
   User user;
   StreamSubscription _intentDataStreamSubscription;
+
+  bool _loading = false;
 
   _HomeScreenState():
       this.userService = locator.get<UserService>(),
@@ -76,10 +79,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _intentDataStreamSubscription =
         ReceiveSharingIntent.getTextStream().listen((String value) {
           log.info("Received $value.  Will clip this recipe");
-          clippingService.clipRecipe(value).then((recipe) =>
-              Navigator.push(context,  MaterialPageRoute(
+          setState(() => _loading = true);
+          clippingService.clipRecipe(value).then((recipe) {
+              setState(() => _loading = false);
+              Navigator.push(context, MaterialPageRoute(
                 builder: (context) => EditRecipeScreen(recipe),
-              ))
+              ));
+            }
           );
         }, onError: (err) {
           log.severe("getLinkStream error", err);
@@ -88,10 +94,13 @@ class _HomeScreenState extends State<HomeScreen> {
     ReceiveSharingIntent.getInitialText().then((String value) {
       if (value != null && value.startsWith("http")) {
         log.info("Received $value.  Will clip this recipe.");
-        clippingService.clipRecipe(value).then((recipe) =>
+        setState(() => _loading = true);
+        clippingService.clipRecipe(value).then((recipe) {
+            setState(() => _loading = false);
             Navigator.push(context, MaterialPageRoute(
               builder: (context) => EditRecipeScreen(recipe),
-            ))
+            ));
+          }
         );
       } else {
         log.info("Received $value but do not recognize it as a URL");
@@ -158,8 +167,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ListTile(
                 title: Text('Import JSON'),
                 trailing: Icon(Icons.file_download),
-                onTap: () {
-                  //todo: implement () => _openFileExplorer();
+                onTap: () async {
+                  var file = await _openFileExplorer();
+                  Navigator.pop(context);
+                  setState(() => _loading = true);
+                  log.info("uploading $file");
+                  var recipesToImport = await new File(file)
+                      .readAsString()
+                      .then((value) => Recipe.fromJsonList(value))
+                      .then(recipeService.importRecipes);
+//                  log.info(recipesToImport);
+                  setState(() => _loading = false);
                 },
               ),
               ListTile(
@@ -174,57 +192,60 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         // https://medium.com/flutterpub/implementing-search-in-flutter-17dc5aa72018
-        body: CustomScrollView(slivers: <Widget>[
-          SliverAppBar(
-              title: Text("Recipes"),
-              floating: true,
-              pinned: true,
-              actions: <Widget>[
-                _sortPopup(),
-                IconButton(
-                  icon: Icon(Icons.loyalty),
-                  color: Colors.white,//tagButtonColor,
-                  onPressed: () {
-                    navigateToTagScreen(context);
-                  },
+        body: LoadingOverlay(child:
+          CustomScrollView(slivers: <Widget>[
+            SliverAppBar(
+                title: Text("Recipes"),
+                floating: true,
+                pinned: true,
+                actions: <Widget>[
+                  _sortPopup(),
+                  IconButton(
+                    icon: Icon(Icons.loyalty),
+                    color: Colors.white,//tagButtonColor,
+                    onPressed: () {
+                      navigateToTagScreen(context);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      showSearch(
+                        context: context,
+                        delegate: RecipeSearchDelegate(user.uid),
+                      );
+                    },
+                  ),
+                ]),
+            StreamBuilder(
+              stream: stream,
+              builder: (context, snapshot) => SliverGrid(
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  ///no.of items in the horizontal axis
+                  //crossAxisCount: 2,
+                  maxCrossAxisExtent: 300,
+                  mainAxisSpacing: 2,
+                  crossAxisSpacing: 2,
+                  childAspectRatio: 0.95, // Needs to match the value on recipe_card_thumbnail.dart to make images look good.
                 ),
-                IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    showSearch(
-                      context: context,
-                      delegate: RecipeSearchDelegate(user.uid),
-                    );
+
+                ///Lazy building of list
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    var docSnapshot = snapshot.data.documents[index];
+                    return RecipeThumbnail(
+                        Recipe.fromMap(docSnapshot.data, docSnapshot.documentID));
                   },
+
+                  /// Set childCount to limit no.of items
+                  childCount:
+                      snapshot.hasData ? snapshot.data.documents.length : 0,
                 ),
-              ]),
-          StreamBuilder(
-            stream: stream,
-            builder: (context, snapshot) => SliverGrid(
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                ///no.of items in the horizontal axis
-                //crossAxisCount: 2,
-                maxCrossAxisExtent: 300,
-                mainAxisSpacing: 2,
-                crossAxisSpacing: 2,
-                childAspectRatio: 0.95, // Needs to match the value on recipe_card_thumbnail.dart to make images look good.
-              ),
-
-              ///Lazy building of list
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  var docSnapshot = snapshot.data.documents[index];
-                  return RecipeThumbnail(
-                      Recipe.fromMap(docSnapshot.data, docSnapshot.documentID));
-                },
-
-                /// Set childCount to limit no.of items
-                childCount:
-                    snapshot.hasData ? snapshot.data.documents.length : 0,
               ),
             ),
+          ],
           ),
-        ],
+          isLoading: _loading,
         ),
         floatingActionButton: new Visibility(
           visible: clearTagsButtonVisible,
@@ -306,22 +327,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
 //https://github.com/miguelpruivo/flutter_file_picker/wiki/Setup#android
 //https://github.com/miguelpruivo/flutter_file_picker/blob/master/example/lib/src/file_picker_demo.dart
-  void _openFileExplorer() async {
-    setState(() => _jsonLoadingPath = true);
-    try{
-      _jsonFilePaths = null;
-      _jsonFilePath = await FilePicker.getFilePath(
-        type: FileType.any,
-        //allowedExtensions: 
-      );
-    } on PlatformException catch (e) {
-      print("Unsupported operation" + e.toString());
-    }
-    if (!mounted) return;
-    setState(() {
-      _jsonLoadingPath = false;
-      _jsonFileName = _jsonFilePath != null ? _jsonFilePath.split('/').last : _jsonFilePaths != null ? _jsonFilePaths.keys.toString() : '...';
-    });
+  Future<String> _openFileExplorer() async {
+//    setState(() => _jsonLoadingPath = true);
+//    try{
+//      _jsonFile = await FilePicker.getFile(
+//        type: FileType.custom,
+//        allowedExtensions: ['json'],
+//      );
+//      if (_jsonFile != null) {
+//        log.info('Uploading ${_jsonFile.path}');
+//      }
+//    } on PlatformException catch (e) {
+//      print("Unsupported operation" + e.toString());
+//    }
+//    if (!mounted) return;
+//    setState(() {
+//      _jsonLoadingPath = false;
+//    });
+//    FlutterDocumentPickerParams params = FlutterDocumentPickerParams(
+//      allowedFileExtensions: ["json"],
+////      allowedUtiTypes: null, todo figure out uti
+//      allowedMimeTypes: ["application/json", "text/plain"],
+//    );
+
+    return await FlutterDocumentPicker.openDocument();
   }
 
   @override

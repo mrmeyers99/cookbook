@@ -8,6 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:home_cooked/locator.dart';
 import 'package:home_cooked/model/parsed_ingredient.dart';
+import 'package:home_cooked/model/recipe.dart';
 import 'package:home_cooked/service/spoonacular_service.dart';
 import 'package:home_cooked/util/fraction_util.dart';
 import 'package:home_cooked/util/string_util.dart';
@@ -95,17 +96,17 @@ class RecipeService {
   }
 
   Future<String> updateRecipe(String id,
-      {name: String,
-      ingredients: String,
-      instructions: String,
-      imageUrl: String,
-      prepTime: int,
-      cookTime: int,
-      readyTime: int,
-      servings: String,
-      source: String,
-      notes: String,
-      tags: String}) {
+      { String name,
+        List<String> ingredients,
+        List<String> instructions,
+        String imageUrl,
+        int prepTime,
+        int cookTime,
+        int readyTime,
+        String servings,
+        String source,
+        String notes,
+        List<String> tags}) {
 
     var ingredientsChecksum = _calculateChecksum(ingredients.join("\n"));
 
@@ -288,6 +289,24 @@ class RecipeService {
         scaledIngredients.add(newValue);
     });
     return scaledIngredients;
+  }
+
+  void importRecipes(List<Recipe> recipes) {
+    recipes.forEach((recipe) {
+      updateRecipe(null,
+        name: recipe.name,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+        imageUrl: recipe.imageUrl,
+        prepTime: recipe.prepTime,
+        cookTime: recipe.cookTime,
+        readyTime: recipe.readyTime,
+        servings: recipe.servings,
+        source: recipe.source,
+        notes: recipe.notes,
+        tags: recipe.tags,
+      );
+    });
   }
 
 }
