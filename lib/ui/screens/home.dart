@@ -400,7 +400,7 @@ class RecipeSearchDelegate extends SearchDelegate {
   }
 
   @override
-  Widget buildResults(BuildContext context, {int maxResults}) {
+  Widget buildResults(BuildContext context, {int maxResults = 0}) {
     if (query.length < 2) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
