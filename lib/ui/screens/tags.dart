@@ -21,6 +21,7 @@ class _TagScreenState extends State<TagScreen> {
   final RecipeService recipeService;
   final Set<String> selectedTags = Set();
   Future<List<String>> tagListFuture;
+  bool filterMatchAll = true;
 
   _TagScreenState()
       : this.userService = locator.get<UserService>(),
@@ -45,35 +46,91 @@ class _TagScreenState extends State<TagScreen> {
                 width: double.infinity,
                 height: double.infinity,
                 child: Column(
-                  children: <Widget>[
-                    SizedBox(height: 15),
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      //runSpacing: 0,
-                      children: snapshot.data.map((tag) => Padding(
-                        padding: const EdgeInsets.only(left: 6, right: 6),
-                        child: FilterChip(
-                          avatar: selectedTags.contains(tag) ? CircleAvatar(backgroundColor: Colors.black) : CircleAvatar(backgroundColor: Colors.white),
-                          label: Text(tag == '' ? 'Untagged' : tag),
-                          onSelected: (bool value) {
-                            setState(() {
-                              if (selectedTags.contains(tag)) {
-                                selectedTags.remove(tag);
-                              } else {
-                                selectedTags.add(tag);
-                              }
-                            });
-                          },
-                          selected: selectedTags.contains(tag),
-                          selectedColor: Colors.deepOrange,
-                          labelStyle: TextStyle(
-                            color: Colors.white,
-                          ),
-                          backgroundColor: Colors.green,
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            SizedBox(height: 15), //For looks - extra padding at top
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              //runSpacing: 0,
+                              children: snapshot.data.map((tag) => Padding(
+                                padding: const EdgeInsets.only(left: 6, right: 6),
+                                child: FilterChip(
+                                  avatar: selectedTags.contains(tag) ? CircleAvatar(backgroundColor: Colors.black) : CircleAvatar(backgroundColor: Colors.white),
+                                  label: Text(tag == '' ? 'Untagged' : tag),
+                                  onSelected: (bool value) {
+                                    setState(() {
+                                      if (selectedTags.contains(tag)) {
+                                        selectedTags.remove(tag);
+                                      } else {
+                                        selectedTags.add(tag);
+                                      }
+                                    });
+                                  },
+                                  selected: selectedTags.contains(tag),
+                                  selectedColor: Colors.deepOrange,
+                                  labelStyle: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                  backgroundColor: Colors.green,
+                                )
+                              )
+                              ).toList().cast<Widget>(),
+                            ),
+                          ],
                         )
                       )
-                      ).toList().cast<Widget>(),
-                    )
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Row(
+                          children: [
+                            Text('Match All'),
+                            Switch(
+                              value: filterMatchAll,
+                              onChanged: (value){
+                                setState(() {
+                                  filterMatchAll=value;
+                                });
+                              },
+                              activeColor: Colors.orange,
+                              activeTrackColor: Colors.orangeAccent
+                            ),
+                          ]
+                        ),
+                        RaisedButton(
+                          color: Colors.orange,
+                          elevation: 2,
+                          onPressed: () {
+                          setState(() {
+                            selectedTags.addAll(snapshot.data);
+                          });},
+                          child: Row(
+                            children: [
+                            Icon(Icons.check),
+                            Text('All')
+                            ]
+                          )
+                        ),
+                        RaisedButton(
+                          color: Colors.orange,
+                          elevation: 2,
+                          onPressed: () {
+                          setState(() {
+                            selectedTags.clear();
+                          });},
+                          child: Row(
+                            children: [
+                            Icon(Icons.clear),
+                            Text('All')
+                            ]
+                          )
+                        ),
+                      ]
+                    ),
                   ]
                 )
               )
@@ -105,7 +162,7 @@ class _TagScreenState extends State<TagScreen> {
                 ],
               ),
             body: body,
-              floatingActionButton: Visibility(
+              /*floatingActionButton: Visibility(
                 visible: snapshot.hasData,
                 child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -133,7 +190,7 @@ class _TagScreenState extends State<TagScreen> {
                     ]
                 ),
               ),
-              floatingActionButtonLocation: FloatingActionButtonLocation.endFloat
+              floatingActionButtonLocation: FloatingActionButtonLocation.endFloat*/
           );
         }
     );
