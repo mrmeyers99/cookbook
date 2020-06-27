@@ -15,10 +15,11 @@ void main() {
   });
 
   test('Spoonacular service should parse ingredients', () async {
-    var ingredients = await spoonacular.parseIngredients(["1/2 cup flour", "4 lbs. butter"]);
+    var ingredients = await spoonacular.parseIngredients(["// comment", "1/2 cup flour", "4 lbs. butter, melted"]);
     expect(ingredients, containsAllInOrder([
+      ParsedIngredient(null, "comment", 2.0, null, "servings", "servings", null, "// comment", "comment", null),
       ParsedIngredient(20081, "flour", 0.5, "cup", "cups", "cup", "flour.png", "1/2 cup flour", "flour", "Baking"),
-      ParsedIngredient(1001, "butter", 4.0, "lbs", "pounds", "lb", "butter-sliced.jpg", "4 lbs. butter", "butter", "Milk, Eggs, Other Dairy"),
+      ParsedIngredient(1001, "butter", 4.0, "lbs", "pounds", "lb", "butter-sliced.jpg", "4 lbs. butter, melted", "butter, melted", "Milk, Eggs, Other Dairy"),
     ]));
   });
 

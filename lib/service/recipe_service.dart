@@ -277,11 +277,11 @@ class RecipeService {
     parsedIngredients.asMap().entries
       .forEach((entry) {
         var newValue = "";
-        var originalName = entry.value.originalName;
-        if (_isHeading(originalName) || _isComment(originalName)) {
-          newValue = originalName;
+        var original = entry.value.original;
+        if (_isHeading(original) || _isComment(original)) {
+          newValue = original;
         } else if (entry.value.id == null) {
-          newValue = "{color:0xFFC62828}$originalName{color}";
+          newValue = "{color:0xFFC62828}$original{color}";
         } else {
           _log.info(entry.value);
           newValue = "${FractionUtil.toFraction(entry.value.amount * scale)} ${entry.value.unit} ${entry.value.originalName}";

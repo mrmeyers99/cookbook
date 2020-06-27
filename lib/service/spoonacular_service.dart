@@ -47,10 +47,16 @@ class SpoonacularService {
     var body = {
       'ingredientList': ingredients.join("\n"),
     };
+    print(ingredients.join("\n"));
     var response = await http.post(url, body: body);
-    var res = json.jsonDecode(Utf8Codec().decode(response.bodyBytes));
-    var parsedIngredients = List<ParsedIngredient>();
-    res.forEach((ingredient) => parsedIngredients.add(ParsedIngredient.fromMap(ingredient)));
-    return parsedIngredients;
+    var responseString = Utf8Codec().decode(response.bodyBytes);
+    print(responseString);
+    var res = json.jsonDecode(responseString);
+    var parsedIngredientMap = Map<String, ParsedIngredient>();
+    res.forEach((ingredient) {
+      var parsedIngredient = ParsedIngredient.fromMap(ingredient);
+      parsedIngredientMap[parsedIngredient.original] = parsedIngredient;
+    });
+    return ingredients.map((ingredient) => parsedIngredientMap[ingredient]).toList();
   }
 }
