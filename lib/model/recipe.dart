@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 class Recipe {
@@ -21,7 +22,14 @@ class Recipe {
   final String source;
   final String notes;
 
-  Recipe({this.id, this.name, this.imageUrl, this.ingredients, this.instructions, this.tags, this.keywords, this.scale, this.scaledIngredients, this.prepTime, this.cookTime, this.readyTime, this.servings, this.source, this.notes});
+  final Timestamp createdAt;
+  final Timestamp updatedAt;
+
+
+  Recipe({this.id, this.name, this.imageUrl, this.ingredients, this.instructions,
+          this.tags, this.keywords, this.scale, this.scaledIngredients,
+          this.prepTime, this.cookTime, this.readyTime, this.servings,
+          this.source, this.notes, this.createdAt, this.updatedAt});
 
   Recipe.blank() : this(id: "", ingredients: List(), instructions: List());
 
@@ -41,7 +49,19 @@ class Recipe {
     servings: data['servings'],
     source: data['source'],
     notes: data['notes'],
+    createdAt: parseDate(data['createdAt']),
+    updatedAt: parseDate(data['updatedAt']),
   );
+
+  static Timestamp parseDate(dynamic date) {
+    if (date is Timestamp) {
+      return date;
+    } else if (date is String) {
+      return Timestamp.fromDate(DateTime.parse(date));
+    } else {
+      return null;
+    }
+  }
 
   static List<Recipe> fromJsonList(String jsonContent) {
     final parsed = json.decode(jsonContent).cast<Map<String, dynamic>>();
@@ -52,9 +72,17 @@ class Recipe {
 
   @override
   String toString() {
-    return 'Recipe{id: $id, name: $name, imageUrl: $imageUrl, ingredients: $ingredients, instructions: $instructions, tags: $tags, keywords: $keywords, scale: $scale, scaledIngredients: $scaledIngredients, prepTime: $prepTime, cookTime: $cookTime, readyTime: $readyTime, servings: $servings, source: $source, notes: $notes}';
+    return 'Recipe{id: $id, name: $name, imageUrl: $imageUrl, ingredients: ${_toStringMaxSize(ingredients)}, instructions: ${_toStringMaxSize(instructions)}, tags: $tags, keywords: $keywords, scale: $scale, scaledIngredients: $scaledIngredients, prepTime: $prepTime, cookTime: $cookTime, readyTime: $readyTime, servings: $servings, source: $source, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 
+  static String _toStringMaxSize(List<String> list) {
+    if (list == null) {
+      return 'null';
+    } else {
+      var string = list.toString();
+      return string.length > 100 ? string.substring(0, 100) : string;
+    }
+  }
 
 }
 

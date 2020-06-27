@@ -106,7 +106,10 @@ class RecipeService {
         String servings,
         String source,
         String notes,
-        List<String> tags}) {
+        List<String> tags,
+        Timestamp createdAt,
+        Timestamp updatedAt,
+      }) {
 
     var ingredientsChecksum = _calculateChecksum(ingredients.join("\n"));
 
@@ -128,8 +131,8 @@ class RecipeService {
                 "servings": servings,
                 "keywords": _buildKeywords(name, ingredients),
                 "tags": tags,
-                "createdAt": FieldValue.serverTimestamp(),
-                "updatedAt": FieldValue.serverTimestamp(),
+                "createdAt": createdAt == null ? FieldValue.serverTimestamp() : createdAt,
+                "updatedAt": updatedAt == null ? FieldValue.serverTimestamp() : updatedAt,
                 'viewedAt': FieldValue.serverTimestamp(),
                 'viewedTimes': 1,
                 'uid': user.uid,
@@ -305,6 +308,8 @@ class RecipeService {
         source: recipe.source,
         notes: recipe.notes,
         tags: recipe.tags,
+        createdAt: recipe.createdAt,
+        updatedAt: recipe.updatedAt,
       );
     });
   }
